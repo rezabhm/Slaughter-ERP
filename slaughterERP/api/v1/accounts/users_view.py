@@ -134,7 +134,7 @@ class UsersAdminAPIView(
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(
     operation_summary='Retrieve user information',
     operation_description='Returns the authenticated user\'s information. The username should be passed in the path.',
-    tags=['accounts'],
+    tags=['accounts.users'],
     manual_parameters=[
         openapi.Parameter(
             'username',
@@ -148,7 +148,7 @@ class UsersAdminAPIView(
 @method_decorator(name='update', decorator=swagger_auto_schema(
     operation_summary='Fully update user data',
     operation_description='This will completely overwrite the user\'s data with new values.',
-    tags=['accounts'],
+    tags=['accounts.users'],
     manual_parameters=[
         openapi.Parameter(
             'username',
@@ -162,7 +162,7 @@ class UsersAdminAPIView(
 @method_decorator(name='partial_update', decorator=swagger_auto_schema(
     operation_summary='Partially update user data',
     operation_description='This will update only the specified fields in the user profile.',
-    tags=['accounts'],
+    tags=['accounts.users'],
     manual_parameters=[
         openapi.Parameter(
             'username',

@@ -39,7 +39,7 @@ class AgricultureSerializers(serializers.ModelSerializer):
         return representation
 
 
-class ProductOwnerListSerializers(serializers.ModelSerializer):
+class ProductOwnerSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = ProductOwner
