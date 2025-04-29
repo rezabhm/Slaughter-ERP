@@ -23,6 +23,14 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
+    def save(self, *args, **kwargs):
+
+        if not self.password:
+
+            self.set_password('1234')
+
+        super().save(*args, **kwargs)
+
 
 class Contact(models.Model):
 
