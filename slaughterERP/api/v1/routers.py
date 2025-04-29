@@ -5,20 +5,36 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from api.v1.accounts.contact_view import ContactAdminAPIView, ContactAPIView
 from api.v1.accounts.role_view import AdminRoleAPIView
 from api.v1.accounts.users_view import UsersAdminAPIView, UsersAPIView
+from api.v1.core_ownership.agriculture_view import AgricultureAPIView, AgricultureAdminAPIView
+from api.v1.core_ownership.city_view import CityAdminAPIView, CityAPIView
+from api.v1.core_ownership.product_owner_view import ProductOwnerAdminAPIView, ProductOwnerAPIView
+from api.v1.core_transportation.car_view import CarAdminAPIView, CarAPIView
+from api.v1.core_transportation.driver_view import DriverAdminAPIView, DriverAPIView
 
 # Rest Framework Router
 router = DefaultRouter()
 
-# login
 # accounts
-router.register('accounts/a/users', UsersAdminAPIView, basename='admin-users')
-router.register('accounts/r/users', UsersAPIView, basename='users')
-router.register('accounts/a/role', AdminRoleAPIView, basename='admin-role')
-router.register('accounts/a/contact', ContactAdminAPIView, basename='admin-contact')
-router.register('accounts/r/contact', ContactAPIView, basename='contact')
+router.register('admin/accounts/users', UsersAdminAPIView, basename='admin-users')
+router.register('any/accounts/users', UsersAPIView, basename='users')
+router.register('admin/accounts/role', AdminRoleAPIView, basename='admin-role')
+router.register('admin/accounts/contact', ContactAdminAPIView, basename='admin-contact')
+router.register('any/accounts/contact', ContactAPIView, basename='contact')
 
-# role
-# contact
+# core.ownership
+router.register('admin/ownership/city', CityAdminAPIView, basename='admin-city')
+router.register('any/ownership/city', CityAPIView, basename='city')
+router.register('admin/ownership/agriculture', AgricultureAdminAPIView, basename='admin-agriculture')
+router.register('any/ownership/agriculture', AgricultureAPIView, basename='agriculture')
+router.register('admin/ownership/product_owner', ProductOwnerAdminAPIView, basename='admin-product_owner')
+router.register('any/ownership/product_owner', ProductOwnerAPIView, basename='product_owner')
+
+# core.transportation
+router.register('admin/transportation/driver', DriverAdminAPIView, basename='admin-driver')
+router.register('any/transportation/driver', DriverAPIView, basename='driver')
+router.register('admin/transportation/car', CarAdminAPIView, basename='admin-car')
+router.register('any/transportation/car', CarAPIView, basename='car')
+
 
 urlpatterns = router.urls
 
