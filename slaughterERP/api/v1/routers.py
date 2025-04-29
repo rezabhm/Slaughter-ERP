@@ -10,6 +10,9 @@ from api.v1.core_ownership.city_view import CityAdminAPIView, CityAPIView
 from api.v1.core_ownership.product_owner_view import ProductOwnerAdminAPIView, ProductOwnerAPIView
 from api.v1.core_transportation.car_view import CarAdminAPIView, CarAPIView
 from api.v1.core_transportation.driver_view import DriverAdminAPIView, DriverAPIView
+from api.v1.product.product_category_view import ProductCategoryAdminAPIView, ProductCategoryAPIView
+from api.v1.product.product_view import ProductAdminAPIView, ProductAPIView
+from api.v1.product.unit_view import UnitAdminAPIView, UnitAPIView
 
 # Rest Framework Router
 router = DefaultRouter()
@@ -26,8 +29,8 @@ router.register('admin/ownership/city', CityAdminAPIView, basename='admin-city')
 router.register('any/ownership/city', CityAPIView, basename='city')
 router.register('admin/ownership/agriculture', AgricultureAdminAPIView, basename='admin-agriculture')
 router.register('any/ownership/agriculture', AgricultureAPIView, basename='agriculture')
-router.register('admin/ownership/product_owner', ProductOwnerAdminAPIView, basename='admin-product_owner')
-router.register('any/ownership/product_owner', ProductOwnerAPIView, basename='product_owner')
+router.register('admin/ownership/product-owner', ProductOwnerAdminAPIView, basename='admin-product-owner')
+router.register('any/ownership/product-owner', ProductOwnerAPIView, basename='product-owner')
 
 # core.transportation
 router.register('admin/transportation/driver', DriverAdminAPIView, basename='admin-driver')
@@ -35,6 +38,13 @@ router.register('any/transportation/driver', DriverAPIView, basename='driver')
 router.register('admin/transportation/car', CarAdminAPIView, basename='admin-car')
 router.register('any/transportation/car', CarAPIView, basename='car')
 
+# product
+router.register('admin/product/product', ProductAdminAPIView, basename='admin-product')
+router.register('any/product/product', ProductAPIView, basename='product')
+router.register('admin/product/unit', UnitAdminAPIView, basename='admin-unit')
+router.register('any/product/unit', UnitAPIView, basename='unit')
+router.register('admin/product/product-category', ProductCategoryAdminAPIView, basename='admin-product-category')
+router.register('any/product/product-category', ProductCategoryAPIView, basename='product-category')
 
 urlpatterns = router.urls
 
