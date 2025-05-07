@@ -8,6 +8,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.accounts.models import CustomUser
 from apps.accounts.serializers import CustomUserSerializers
+from utils.jwt_validator import CustomJWTAuthentication
 from utils.rest_framework_class import BaseAPIView
 
 
@@ -119,7 +120,7 @@ class UsersAdminAPIView(
     - List: Admin can view a list of all users with search functionality.
     """
 
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [CustomJWTAuthentication]
     permission_classes = [IsAdminUser]
     serializer_class = CustomUserSerializers
     lookup_field = 'username'

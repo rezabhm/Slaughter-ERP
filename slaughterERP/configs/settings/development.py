@@ -42,15 +42,23 @@ CORS_ALLOWED_ORIGINS = [
     # "https://your-production-domain.com",
 ]
 
+# بارگذاری کلید خصوصی از فایل PEM
+with open('configs/settings/jwt/private_key.pem', 'rb') as private_key_file:
+    JWT_SECRET_KEY = private_key_file.read()
+
+# بارگذاری کلید عمومی از فایل PEM
+with open('configs/settings/jwt/public_key.pem', 'rb') as public_key_file:
+    JWT_PUBLIC_KEY = public_key_file.read()
+
 # JWT settings
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),  # Set token expiration time
     'REFRESH_TOKEN_LIFETIME': timedelta(days=5),     # Refresh token expiration time
     'ROTATE_REFRESH_TOKENS': False,  # You can set to True for refreshing access tokens
     'BLACKLIST_AFTER_ROTATION': True,  # Optional: blacklisting old refresh tokens
-    'ALGORITHM': 'HS256',  # You can change the algorithm to your preference
-    # 'SIGNING_KEY': 'your_secret_key',  # Set your secret key (should be a strong, unique key)
-    # 'VERIFYING_KEY': None,
+    'ALGORITHM': 'RS256',  # You can change the algorithm to your preference
+    'SIGNING_KEY': JWT_SECRET_KEY,  # Set your secret key (should be a strong, unique key)
+    'VERIFYING_KEY': JWT_PUBLIC_KEY,
     # 'AUDIENCE': None,
     # 'ISSUER': None,
 }

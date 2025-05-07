@@ -1,6 +1,5 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from api.v1.accounts.contact_view import ContactAdminAPIView, ContactAPIView
 from api.v1.accounts.role_view import AdminRoleAPIView
@@ -10,6 +9,7 @@ from api.v1.core_ownership.city_view import CityAdminAPIView, CityAPIView
 from api.v1.core_ownership.product_owner_view import ProductOwnerAdminAPIView, ProductOwnerAPIView
 from api.v1.core_transportation.car_view import CarAdminAPIView, CarAPIView
 from api.v1.core_transportation.driver_view import DriverAdminAPIView, DriverAPIView
+from api.v1.jwt import CustomTokenObtainPairView
 from api.v1.product.product_category_view import ProductCategoryAdminAPIView, ProductCategoryAPIView
 from api.v1.product.product_view import ProductAdminAPIView, ProductAPIView
 from api.v1.product.unit_view import UnitAdminAPIView, UnitAPIView
@@ -51,6 +51,6 @@ urlpatterns = router.urls
 # Manual url
 urlpatterns += [
 
-    path('auth/login', TokenObtainPairView.as_view(), name='login')
+    path('auth/login', CustomTokenObtainPairView.as_view(), name='login')
 
 ]
