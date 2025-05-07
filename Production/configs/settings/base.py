@@ -25,18 +25,29 @@ SECRET_KEY = 'django-insecure-prt2@g^nl5x^9_ji&1l3&&)!)f#@%qjrm1q6rvq%3qy&x%)^82
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
+
+    # Custom Apps
+    'apps.production',
+    'apps.planning',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third-party apps
+    'corsheaders',
+    'rest_framework',
+    'drf_yasg',
+    'rest_framework_simplejwt',
+
 ]
 
 MIDDLEWARE = [
@@ -47,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'configs.urls'
@@ -121,3 +133,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django Rest Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'utils.jwt_validator.CustomJWTAuthentication',  # Use JWT
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # Optional: restrict access to authenticated users
+    ),
+}
