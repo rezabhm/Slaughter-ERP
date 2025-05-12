@@ -61,3 +61,10 @@ SIMPLE_JWT = {
     # 'AUDIENCE': None,
     # 'ISSUER': None,
 }
+
+
+# mongoDB settings
+MONGODB_SETTINGS = {
+    "db": "configs",
+    "host": "mongodb://localhost:27017/configs",
+}

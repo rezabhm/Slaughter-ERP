@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     # Custom Apps
     'apps.production',
     'apps.planning',
+    'apps.poultry_cutting_production',
+    'apps.core',
 
     'django.contrib.admin',
     'django.contrib.auth',
