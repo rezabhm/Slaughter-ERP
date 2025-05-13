@@ -47,7 +47,10 @@ class ImportProduct(mongo.Document):
     product = mongo.StringField(default='')
     product_owner = mongo.StringField(default='')
 
-    weight = mongo.FloatField(default=0.0)
+    first_car_weight = mongo.FloatField(default=0.0)
+    second_car_weight = mongo.FloatField(default=0.0)
+    source_weight = mongo.FloatField(default=0.0)
+
     transit_losses_weight = mongo.FloatField(default=0.0)
     losses_weight = mongo.FloatField(default=0.0)
 
@@ -61,6 +64,8 @@ class ImportProduct(mongo.Document):
     is_planned = mongo.BooleanField(default=False)
     is_cancelled = mongo.BooleanField(default=False)
     is_verified = mongo.BooleanField(default=False)
+
+    extra_description = mongo.StringField(default='')
 
     production_status = mongo.StringField(choices=production_series_status, default='pending')
 

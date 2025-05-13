@@ -25,8 +25,6 @@ SECRET_KEY = 'django-insecure-prt2@g^nl5x^9_ji&1l3&&)!)f#@%qjrm1q6rvq%3qy&x%)^82
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -49,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'rest_framework_simplejwt',
+    'django_filters',
 
 ]
 
@@ -144,4 +143,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',  # Optional: restrict access to authenticated users
     ),
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }

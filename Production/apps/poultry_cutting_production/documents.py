@@ -33,7 +33,7 @@ class PoultryCuttingProductionSeries(mongo.Document):
     finished_date = mongo.DateTimeField(default='')
 
 
-class PoultryCuttingProductionImport(mongo.Document):
+class PoultryCuttingImportProduct(mongo.Document):
 
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('PoultryCuttingProductionImport'))
 
@@ -58,7 +58,7 @@ class PoultryCuttingProductionImport(mongo.Document):
     poultry_cutting_production_series = mongo.ReferenceField(PoultryCuttingProductionSeries, default='')
 
 
-class PoultryCuttingProductionExport(mongo.Document):
+class PoultryCuttingExportProduct(mongo.Document):
 
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('PoultryCuttingProductionExport'))
 

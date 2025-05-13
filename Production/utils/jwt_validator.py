@@ -34,9 +34,10 @@ class CustomJWTAuthentication(JWTAuthentication):
             # Attach payload for future use (optional)
             request.user_payload = payload
 
-            return (user, token)  # ✅ this is what DRF expects
+            return user, token
 
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Token has expired")
         except jwt.InvalidTokenError:
             raise AuthenticationFailed("Invalid token")
+م
