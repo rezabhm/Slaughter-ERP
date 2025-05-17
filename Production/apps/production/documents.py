@@ -1,6 +1,6 @@
-import mongoengine as mongo
-from django.utils import timezone
+import mongoengine
 
+from apps.core.documents import *
 from utils.id_generator import id_generator
 
 production_series_status = (
@@ -22,86 +22,113 @@ class ProductionSeries(mongo.Document):
 
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('ProductionSeries'))
 
-    create_date = mongo.DateTimeField(default='')
-    start_date = mongo.DateTimeField(default='')
-    finished_date = mongo.DateTimeField(default='')
+    create = mongo.EmbeddedDocument(DateUser, null=True)
+    start = mongo.EmbeddedDocument(DateUser, null=True)
+    finish = mongo.EmbeddedDocument(DateUser, null=True)
 
-    product_owner = mongo.StringField(default='')
-
-    created_user = mongo.StringField(default='')
-    started_user = mongo.StringField(default='')
-    finished_user = mongo.StringField(default='')
+    product_owner = mongo.IntField(null=True)
 
     status = mongo.StringField(default='pending', choices=production_series_status)
+
+
+class FirstStepImportCar(mongo.Document):
+
+    entrance_to_slaughter = mongo.EmbeddedDocument(DateUser, null=True)
+
+
+class SecondStepImportCar(mongo.Document):
+
+    full_weight = mongo.FloatField(default=0.0)
+    source_weight = mongo.FloatField(default=0.0)
+    cage_number = mongo.IntField(default=1)
+    product_number_per_cage = mongo.IntField(default=1)
+
+
+class ThirdStepImportCar(mongo.Document):
+    
+    start_production = mongo.EmbeddedDocument(DateUser)
+
+
+class FourthStepImportCar(mongo.Document):
+    finish_production = mongo.EmbeddedDocument(DateUser)
+
+
+class FifthStepImportCar(mongo.Document):
+
+    empty_weight = mongo.FloatField(default=0.0)
+
+    transit_losses_wight = mongo.FloatField(default=0.0)
+    transit_losses_number = mongo.IntField(default=0)
+
+    losses_weight = mongo.FloatField(default=0.0)
+    losses_number = mongo.IntField(default=0)
+
+    fuel = mongo.FloatField(default=0.0)
+
+    extra_description = mongo.StringField(default='')
+
+
+class SixthStepImportCar(mongo.Document):
+
+    exit_from_slaughter = mongo.EmbeddedDocument(DateUser)
+
+
+class SeventhStepImportCar(mongo.Document):
+
+    product_slaughter_number = mongo.IntField(default=1)
 
 
 class ImportProduct(mongo.Document):
 
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('ImportProduct'))
+    level = mongo.IntField(default=1)
 
-    city = mongo.StringField(default='')
-    agriculture = mongo.StringField(default='')
-    driver = mongo.StringField(default='')
-    car = mongo.StringField(default='')
+    agriculture = mongo.ReferenceField(Agriculture)
+    car = mongo.ReferenceField(Car)
+    product = mongo.ReferenceField(Product)
 
-    product = mongo.StringField(default='')
-    product_owner = mongo.StringField(default='')
+    slaughter_type = mongo.StringField(default='', choices=())
+    order_type = mongo.StringField(default='', choices=())
 
-    first_car_weight = mongo.FloatField(default=0.0)
-    second_car_weight = mongo.FloatField(default=0.0)
-    source_weight = mongo.FloatField(default=0.0)
+    first_step = mongo.EmbeddedDocument(FirstStepImportCar, null=True)
+    second_step = mongo.EmbeddedDocument(SecondStepImportCar, null=True)
+    third_step = mongoengine.EmbeddedDocument(ThirdStepImportCar, null=True)
+    fourth_step = mongo.EmbeddedDocument(FourthStepImportCar, null=True)
+    fifth_step = mongo.EmbeddedDocument(FifthStepImportCar, null=True)
+    sixth_step = mongo.EmbeddedDocument(SixthStepImportCar, null=True)
+    seventh_step = mongo.EmbeddedDocument(SeventhStepImportCar, null=True)
 
-    transit_losses_weight = mongo.FloatField(default=0.0)
-    losses_weight = mongo.FloatField(default=0.0)
+    is_planned = mongo.EmbeddedDocument(CheckStatus)
+    is_cancelled = mongo.EmbeddedDocument(CheckStatus)
+    is_verified = mongo.EmbeddedDocument(CheckStatus)
 
-    initial_number = mongo.IntField(default=0)
-    finished_number = mongo.IntField(default=0)
-    transit_losses_number = mongo.IntField(default=0)
-    losses_number = mongo.IntField(default=0)
-
-    fuel = mongo.FloatField(default=0.0)
-
-    is_planned = mongo.BooleanField(default=False)
-    is_cancelled = mongo.BooleanField(default=False)
-    is_verified = mongo.BooleanField(default=False)
-
-    extra_description = mongo.StringField(default='')
-
-    production_status = mongo.StringField(choices=production_series_status, default='pending')
-
-    create_date = mongo.DateTimeField(default=timezone.now)
-    cancelled_date = mongo.DateTimeField(default='')
-    production_start_date = mongo.DateTimeField(default='')
-    production_finished_date = mongo.DateTimeField(default='')
-    planned_date = mongo.DateTimeField(default='')
-    verified_date = mongo.DateTimeField(default='')
+    create = mongo.EmbeddedDocument(DateUser)
 
     production_series = mongo.ReferenceField(ProductionSeries, default='')
 
 
-class ImportProductFromWarHouse(mongo.Document):
-
-    id = mongo.StringField(primary_key=True, default=lambda: id_generator('ImportProductFromWarHouse'))
+class ImportProductFromWareHouseProductDescription(mongo.Document):
 
     warehouse_unit = mongo.StringField(default='')
     product_owner = mongo.StringField(default='')
     product = mongo.StringField(default='')
 
-    weight = mongo.FloatField(default=0.0)
-    numbers = mongo.IntField(default=1)
 
-    is_verified = mongo.BooleanField(default=False)
-    is_planned = mongo.BooleanField(default=False)
-    is_cancelled = mongo.BooleanField(default=False)
+class ImportProductFromWarHouse(mongo.Document):
 
-    production_status = mongo.StringField(choices=production_series_status)
+    id = mongo.StringField(primary_key=True, default=lambda: id_generator('ImportProductFromWarHouse'))
+    level = mongo.IntField(default=1)
 
-    create_date = mongo.DateTimeField(default=timezone.now)
-    verified_date = mongo.DateTimeField(default='')
-    planned_date = mongo.DateTimeField(default='')
-    cancelled_date = mongo.DateTimeField(default='')
-    production_start_date = mongo.DateTimeField(default='')
-    production_finished_date = mongo.DateTimeField(default='')
+    product_description = mongo.ReferenceField(ImportProductFromWareHouseProductDescription)
+    product_information = mongo.EmbeddedDocument(ProductInformation)
+
+    is_verified = mongo.EmbeddedDocument(CheckStatus)
+    is_planned = mongo.EmbeddedDocument(CheckStatus)
+    is_cancelled = mongo.EmbeddedDocument(CheckStatus)
+
+    create_date = mongo.EmbeddedDocument(DateUser)
+    production_start_date = mongo.EmbeddedDocument(DateUser)
+    production_finished_date = mongo.EmbeddedDocument(DateUser)
 
     production_series = mongo.ReferenceField(ProductionSeries, default='')
 
@@ -110,19 +137,13 @@ class ExportProduct(mongo.Document):
 
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('ExportProduct'))
 
-    export_product = mongo.StringField(default='')
+    product = mongo.StringField(default='')
     receiver_delivery_unit = mongo.StringField(default='')
 
-    weight = mongo.FloatField(default=0.0)
-    number = mongo.IntField(default=1)
+    product_information = mongo.EmbeddedDocument(ProductInformation)
 
-    create_user = mongo.StringField(default='')
-    verified_user = mongo.StringField(default='')
-
-    is_verified_by_receiver_delivery_unit_user = mongo.BooleanField(default=False)
-
-    create_date = mongo.DateTimeField(default=timezone.now)
-    verified_date = mongo.DateTimeField(default='')
+    create = mongo.EmbeddedDocument(DateUser)
+    is_verified_by_receiver_delivery_unit_user = mongo.EmbeddedDocument(CheckStatus)
 
     production_series = mongo.ReferenceField(ProductionSeries, default='')
 
@@ -131,26 +152,15 @@ class ReturnProduct(mongo.Document):
 
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('ExportProduct'))
 
-    product = mongo.StringField(default='')
-    product_owner = mongo.StringField(default='')
-
+    receiver_delivery_unit = mongo.StringField(default='')
+    product = mongo.EmbeddedDocument(Product)
+    product_information = mongo.EmbeddedDocument(ProductInformation)
     return_type = mongo.StringField(choices=return_type_dict, default='return from production')
 
-    is_verified = mongo.BooleanField(default=False)
-
-    create_user = mongo.StringField(default='')
-    verified_user = mongo.StringField(default='')
-
-    create_date = mongo.DateTimeField(default=timezone.now)
-    verified_date = mongo.DateTimeField(default='')
-
-    weight = mongo.FloatField(default=0.0)
-    number = mongo.IntField(default=1)
+    create = mongo.EmbeddedDocument(DateUser)
+    verified = mongo.EmbeddedDocument(CheckStatus)
 
     is_useful = mongo.BooleanField(default=True)
     is_repack = mongo.BooleanField(default=False)
-    is_verified_by_receiver_delivery_unit_user = mongo.BooleanField(default=False)
-
-    receiver_delivery_unit = mongo.StringField(default='')
 
     production_series = mongo.ReferenceField(ProductionSeries, default='')

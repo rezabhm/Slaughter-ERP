@@ -40,4 +40,3 @@ class CustomJWTAuthentication(JWTAuthentication):
             raise AuthenticationFailed("Token has expired")
         except jwt.InvalidTokenError:
             raise AuthenticationFailed("Invalid token")
-م

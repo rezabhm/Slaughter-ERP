@@ -8,7 +8,7 @@ from api.v1.poultry_cutting_production.production_series_view import PoultryCutt
 from api.v1.poultry_cutting_production.return_product_view import PoultryCuttingReturnProductCRUDAPIView
 from api.v1.production.export_product_view import ExportProductCRUDAPIView
 from api.v1.production.import_product_view import ImportProductCRUDAPIView, ImportProductFromWarHouseCRUDAPIView
-from api.v1.production.production_view import ProductionSeriesCRUDAPIView
+from api.v1.production.production_series_view import ProductionSeriesCRUDAPIView
 from api.v1.production.return_product_view import ReturnProductCRUDAPIView
 
 router = DefaultRouter()

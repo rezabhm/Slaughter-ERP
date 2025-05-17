@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework.generics import GenericAPIView
 from rest_framework import mixins, filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -6,6 +7,7 @@ from apps.production.documents import ImportProduct, ImportProductFromWarHouse
 from apps.production.serializers.import_product_serializer import ImportProductSerializer, \
     ImportProductFromWarHouseSerializer
 from utils.jwt_validator import CustomJWTAuthentication
+from utils.post_request import CustomAPIView
 from utils.request_permission import RoleBasedPermission
 
 
@@ -79,3 +81,31 @@ class ImportProductFromWarHouseCRUDAPIView(
 
     def get_queryset(self):
         return ImportProductFromWarHouse.objects()
+
+
+class ProductionImportByCarFirstStepAPIView(CustomAPIView):
+
+    attribute = {
+
+        'entrance_to_slaughter_date': {
+            'send_required': False,
+            'fun': lambda req, param_post_data: timezone.now()
+        },
+
+        'entrance_to_slaughter_user': {
+            'send_required': False,
+            'fun': lambda req, param_post_data: req.user_payload['username']
+        },
+
+    }
+
+    allowed_roles = {
+
+        'POST': ['admin'],
+
+    }
+
+    def get_queryset(self):
+        return ImportProduct.objects()
+
+
