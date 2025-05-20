@@ -36,7 +36,6 @@ class CustomSerializer:
 
                     if name in fields or fields == '__all__':
 
-
                         value = validated_data.get(name, None)
                         if value:
 
@@ -81,6 +80,46 @@ class CustomSerializer:
 
         self.data = []
         self.queryset = model_list
+        self.pars_object()
+
+    def update(self, validated_data):
+
+        meta = getattr(self.__class__, 'Meta', None)
+        serializer_fields = getattr(meta, 'fields', [])
+
+        for instance, validated_data in zip(self.queryset, validated_data):
+
+            fields_dict = {name: field for name, field in instance._fields.items()}
+
+            for key, value in validated_data.items():
+
+                if (key in serializer_fields or serializer_fields == '__all__') and key in list(fields_dict.keys()):
+
+                    field = fields_dict[key]
+                    if field.__class__.__name__ in ['EmbeddedDocumentField', 'ReferenceField']:
+                        related_class = field.document_type
+
+                        if isinstance(value, dict):
+                            related_instance = related_class(**value)
+
+                            if field.__class__.__name__ == 'ReferenceField':
+                                related_instance.save()  # فقط برای ReferenceField نیاز به ذخیره هست
+
+                            value = related_instance
+                        else:
+                            # اگر value دیکشنری نیست، شاید خودش instance باشه یا id
+                            if field.__class__.__name__ == 'ReferenceField' and isinstance(value,
+                                                                                           (str, ObjectId)):
+                                try:
+                                    value = related_class.objects.get(id=value)
+                                except related_class.DoesNotExist:
+                                    raise ValueError(f"{related_class.__name__} with id {value} not found")
+
+                    setattr(instance, key, value)
+
+            instance.save()
+
+        self.data = []
         self.pars_object()
 
     def pars_object(self):

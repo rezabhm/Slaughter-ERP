@@ -52,7 +52,7 @@ with open('configs/settings/jwt/public_key.pem', 'rb') as public_key_file:
 
 # JWT settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),  # Set token expiration time
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),  # Set token expiration time
     'REFRESH_TOKEN_LIFETIME': timedelta(days=5),     # Refresh token expiration time
     'ROTATE_REFRESH_TOKENS': False,  # You can set to True for refreshing access tokens
     'BLACKLIST_AFTER_ROTATION': True,  # Optional: blacklisting old refresh tokens

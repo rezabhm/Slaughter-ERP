@@ -1,3 +1,4 @@
+import inspect
 
 from django.http import JsonResponse
 from rest_framework import status
@@ -47,13 +48,29 @@ class CustomAPIView(GenericAPIView):
                     return self.perform_action_bulk(request, *args, **kwargs)
                 elif len(dispatched_url) == 1:
                     # bulk action on data with specific action
-                    return self.perform_specific_action_bulk(request, action=dispatched_url[0], *args, **kwargs)
+                    return self.perform_specific_action_bulk(request, action=dispatched_url[0])
                 elif len(dispatched_url) == 2:
                     # single action on one data
-                    return self.perform_action(request, action=dispatched_url[1], slug_field=dispatched_url[0], *args, **kwargs)
+                    return self.perform_action(request, action=dispatched_url[1], slug_field=dispatched_url[0])
                 else:
                     return JsonResponse(data={'message': 'Method are not allowed for this url'},
                                         status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        elif request.method == 'PATCH':
+
+            if '/p/' in request.path:
+                return JsonResponse(data={'message': 'Method are not allowed for this url'},
+                                    status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+            return self.patch_request(request, *args, **kwargs)
+
+        elif request.method == "DELETE":
+
+            if '/p/' in request.path:
+                return JsonResponse(data={'message': 'Method are not allowed for this url'},
+                                    status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+            return self.delete_request(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return self.request_handler(request, *args, **kwargs)
@@ -61,10 +78,94 @@ class CustomAPIView(GenericAPIView):
     def get(self, request, *args, **kwargs):
         return self.request_handler(request, *args, **kwargs)
 
+    def patch(self, request, *args, **kwargs):
+        return self.request_handler(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.request_handler(request, *args, **kwargs)
+
+    def delete_request(self, request, slug_field=None):
+        lookup_field = getattr(self, 'lookup_field', 'id')
+
+        if slug_field:
+
+            obj = self.get_query({lookup_field:  slug_field})
+
+            if isinstance(obj, JsonResponse) or not obj:
+                return obj if obj else JsonResponse(data={'message':'wrong slug field'}, status=status.HTTP_404_NOT_FOUND)
+
+            obj.delete()
+            return JsonResponse(data={'data': 'object delete successfully '}, status=status.HTTP_200_OK)
+
+        else:
+
+            response = {}
+            data = request.data.get('data', None)
+
+            if not data or not isinstance(data, list):
+                return JsonResponse(data={'message': f'you must add data param to your data that must be list of data"s id with <{lookup_field}>'}, status=status.HTTP_400_BAD_REQUEST)
+
+            for id_ in data:
+
+                if not isinstance(id_, str) and not isinstance(id_, int):
+                    return JsonResponse(data={
+                        'message': f'id must be str or int'},
+                                        status=status.HTTP_400_BAD_REQUEST)
+
+                obj = self.get_query({lookup_field: id_})
+
+                if isinstance(obj, JsonResponse) or not obj:
+
+                    response[id_] = obj if obj else {'message': 'wrong id ', "status": 400}
+                else:
+                    obj.delete()
+                    response[id_] = {'message': 'object delete successfully ', 'status': 200}
+
+            return JsonResponse(data={'data': response}, status=status.HTTP_200_OK)
+
+    def patch_request(self, request, slug_field=None):
+
+        serializer = self.serializer_class['PATCH']
+        if slug_field:
+
+            lookup_field = getattr(self, 'lookup_field', 'id')
+            obj = self.get_query({lookup_field:  slug_field})
+
+            if isinstance(obj, JsonResponse) or not obj:
+                return obj if obj else JsonResponse(data={
+                    "message": f'cant match object with your {lookup_field} --> {slug_field}'}, status=status.HTTP_400_BAD_REQUEST)
+
+            model_serializer = serializer(obj, many=False)
+
+            validated_data = [request.data]
+            model_serializer.update(validated_data)
+
+            return JsonResponse(data={'message': 'data are update', 'data': model_serializer.data}, status=status.HTTP_200_OK)
+
+        else:
+
+            valid_data_list = []
+            object_list = []
+            for key, value in request.data.items():
+
+                if isinstance(value, dict) and value.get('id', None):
+
+                    id_ = value['id']
+                    obj = self.get_query({'id': id_})
+
+                    if not isinstance(obj, JsonResponse) and obj:
+                        object_list.append(obj)
+                        valid_data_list.append(value)
+
+            model_serializer = serializer(object_list, many=True)
+            model_serializer.update(valid_data_list)
+
+            return JsonResponse(data={'message': 'data lists data are update', 'data': model_serializer.data}, status=status.HTTP_200_OK)
+
     def dispatch_url(self, partition):
 
         before, sep, after = self.request.path.partition(partition)
-        return after.split('/')
+        return [] if len(after) == 0 else after.split('/')
 
     def get_queryset_with_filters(self):
         """
@@ -123,8 +224,6 @@ class CustomAPIView(GenericAPIView):
 
             if not data:
                 return JsonResponse(data={'message': 'data parameter didnt send in json body'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # request_data.pop('many')
 
             model_serializer = serializer(data, many=many)
             model_serializer.create(request)
@@ -249,3 +348,85 @@ class CustomAPIView(GenericAPIView):
                     filters_param += self.generate_filters_param(nested_fields, base_name=f'{base_name}{name}__')
 
         return filters_param
+
+    def perform_action_bulk(self, request, *args, **kwargs):
+
+        all_action_dict = self.get_action_fun_list()
+        response = {}
+        for key, value in request.data.items():
+
+            if isinstance(value, dict):
+
+                action_name = value.get('action', None)
+                if not action_name:
+                    response[key] = {'message': 'you must add <action> to data for determine action type', 'status': 400}
+
+                    continue
+
+                action = all_action_dict.get(action_name, None)
+
+                if not action:
+                    response[key] = {'message': 'didnt match action , action didnt exist', 'status': 400}
+                    continue
+
+                value.pop('action')
+                res = action(request, value)
+
+                response[key] = res
+
+        return JsonResponse(data=response, status=status.HTTP_200_OK)
+
+    def perform_specific_action_bulk(self, request, action=None):
+
+        response = {}
+        all_action_dict = self.get_action_fun_list()
+
+        action_fun = all_action_dict.get(action, None)
+
+        if not action_fun:
+            return JsonResponse(data={'message': "action didnt find"}, status=status.HTTP_400_BAD_REQUEST)
+
+        for key, value in request.data.items():
+
+            if isinstance(value, dict):
+                res = action_fun(request, value)
+                response[key] = res
+            else:
+                response[key] = {'message': "you must send dict data", 'status': status.HTTP_400_BAD_REQUEST}
+
+        return JsonResponse(data=response, status=status.HTTP_200_OK)
+
+    def perform_action(self, request, action=None, slug_field=None):
+
+        if not action and not slug_field:
+            return JsonResponse(data={'message': 'you must add action and slug_field in url'}, status=status.HTTP_400_BAD_REQUEST)
+
+        all_action_dict = self.get_action_fun_list()
+
+        if action not in all_action_dict:
+            return JsonResponse(data={'message':'action didnt match'}, status=status.HTTP_400_BAD_REQUEST)
+
+        lookup_field = getattr(self, 'lookup_field', 'id')
+        obj = self.get_query({lookup_field: str(slug_field)})
+        if isinstance(obj, JsonResponse) or not obj:
+            return obj if obj else JsonResponse(data={'message': 'object didnt match with your id'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class['PERFORM_ACTION'].get(action, self.serializer_class['POST'])
+        model_serializer = serializer(obj, many=False)
+        res = all_action_dict[action](request, model_serializer.data)
+
+        return JsonResponse(data=res, status=int(res['status']))
+
+    def get_action_fun_list(self):
+
+        methods = [name for name, member in inspect.getmembers(self.__class__)
+                   if inspect.isfunction(member) and not name.startswith("__")]
+
+        action_function_list = {}
+        for name in methods:
+            if name.startswith('action'):
+
+                action = getattr(self, name, None)
+                action_function_list[name[7:]] = action
+
+        return action_function_list

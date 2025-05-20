@@ -108,27 +108,38 @@ from utils.custom_serializer import CustomSerializer
 class TestSerializer(CustomSerializer):
 
     class Meta:
-        model = ImportProduct
+        model = ProductionSeries
         fields = '__all__'
 
 
 class TestAPIView(CustomAPIView):
 
-    model = ImportProduct
+    model = ProductionSeries
     lookup_field = 'id'
     ordering_fields = '-id'
     serializer_class = {
 
         'GET': TestSerializer,
         'POST': TestSerializer,
+        'PATCH': TestSerializer,
+        'PERFORM_ACTION': {
+
+            'test': TestSerializer,
+        },
     }
 
     allowed_roles = {
 
         'GET': ['admin'],
         'POST': ['admin'],
+        'PATCH': ['admin'],
+        'DELETE': ['admin'],
 
     }
 
     def get_queryset(self):
         return self.model.objects()
+
+    def action_test(self, request, data):
+        print('run test action')
+        return {'message': 'successfully run', 'status': 200}
