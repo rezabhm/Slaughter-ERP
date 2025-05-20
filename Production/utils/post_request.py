@@ -1,14 +1,14 @@
 from django.http import JsonResponse
-from rest_framework.generics import GenericAPIView
 from rest_framework import status
+from rest_framework.generics import GenericAPIView
 
 from utils.jwt_validator import CustomJWTAuthentication
 from utils.request_permission import RoleBasedPermission
 
 
-def update_obj(request, attribute, attribute_value, obj_id, obj):
+def update_obj(request, request_data, attribute, attribute_value, obj_id, obj):
 
-    post_data = request.data[obj_id][attribute] if attribute_value['send_required'] else ''
+    post_data = request_data[obj_id][attribute] if attribute_value['send_required'] else ''
     new_data = attribute_value['fun'](request, post_data)
     setattr(obj, attribute, new_data)
 
@@ -32,6 +32,14 @@ class CustomAPIView(GenericAPIView):
     }
     
     '''
+
+    def get(self, request):
+        data = self.get_queryset()
+        return JsonResponse(data={'message': 'hello'}, status=200)
+
+    def patch(self, request):
+        return JsonResponse(data={'message': 'hello'}, status=200)
+
 
     def post(self, request):
         """
@@ -59,16 +67,17 @@ class CustomAPIView(GenericAPIView):
         """
 
         # Determine if this is a bulk update
-        many = request.data.get('many', False)
+        request_data = request.data
+        many = request_data.get('many', False)
 
         # Convert single update format to bulk-like format
         if not many:
-            request.data = {str(request.data['id']): request.data}
+            request_data = {str(request_data['id']): request_data}
 
         # Process each object update
-        for obj_id in request.data.keys():
-            if obj_id == "many":
-                continue  # Skip the 'many' key
+        for obj_id in request_data.keys():
+            if obj_id == "many" or obj_id == 'id':
+                continue  # Skip the 'many' and 'id' key
 
             obj = self.get_query(obj_id)
 
@@ -79,7 +88,7 @@ class CustomAPIView(GenericAPIView):
                 )
 
             # Validate required fields
-            msg, data_status = self.check_user_data(request.data[obj_id], obj_id)
+            msg, data_status = self.check_user_data(request_data[obj_id], obj_id)
             if not data_status:
                 return JsonResponse(msg, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,12 +97,13 @@ class CustomAPIView(GenericAPIView):
                 try:
 
                     update_obj(request=request,
+                               request_data=request_data,
                                attribute=attribute, attribute_value=attribute_value,
                                obj_id=obj_id, obj=obj)
 
                 except Exception as e:
                     return JsonResponse(
-                        {"message": f"Invalid value or type for <{attribute}>."},
+                        {"message": f"Invalid value or type for <{attribute}>. ERROR : {e}"},
                         status=status.HTTP_400_BAD_REQUEST
                     )
 

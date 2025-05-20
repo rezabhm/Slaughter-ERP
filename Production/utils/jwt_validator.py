@@ -1,3 +1,4 @@
+
 from django.contrib.auth import get_user_model
 import jwt
 from rest_framework_simplejwt.authentication import JWTAuthentication

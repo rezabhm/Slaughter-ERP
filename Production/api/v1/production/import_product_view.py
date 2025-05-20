@@ -1,5 +1,5 @@
 from django.utils import timezone
-from rest_framework.generics import GenericAPIView
+from rest_framework.viewsets import GenericViewSet
 from rest_framework import mixins, filters
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -13,7 +13,7 @@ from utils.request_permission import RoleBasedPermission
 
 class ImportProductCRUDAPIView(
 
-    GenericAPIView,
+    GenericViewSet,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
@@ -49,7 +49,7 @@ class ImportProductCRUDAPIView(
 
 class ImportProductFromWarHouseCRUDAPIView(
 
-    GenericAPIView,
+    GenericViewSet,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,

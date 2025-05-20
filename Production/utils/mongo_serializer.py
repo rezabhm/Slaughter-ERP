@@ -58,14 +58,28 @@ class MongoSerializer(serializers.Serializer):
         model, fields = self.get_model()
         model_fields = get_model_fields(model, fields)
 
+        # get meta
+        meta = getattr(self.__class__, 'Meta', None)
+        post_required_data = getattr(meta, 'post_required_data', [])
+
         # Dynamically create serializer fields based on MongoEngine model
         for key, field in model_fields.items():
             drf_field = map_field_type(field)
             if drf_field:
-                self.fields[key] = drf_field(read_only=(key == 'id'))
+                self.fields[key] = drf_field(read_only=(key == 'id'),
+                                             required=True if key in post_required_data else False)
 
     def create(self, validated_data):
-        # Prepare embedded fields before saving
+        model, fields = self.get_model()
+        model_fields = get_model_fields(model, fields)
+
+        # Handle default for EmbeddedDocumentFields
+        for key, field in model_fields.items():
+            if isinstance(field, mongoengine.EmbeddedDocumentField) and key not in validated_data:
+                if field.default:
+                    default_val = field.default() if callable(field.default) else field.default
+                    validated_data[key] = default_val
+
         validated_data = self.prepare_embedded_fields(validated_data)
         return self.Meta.model(**validated_data).save()
 
@@ -96,6 +110,7 @@ class MongoSerializer(serializers.Serializer):
     def to_representation(self, instance):
         # Base representation
         data = super().to_representation(instance)
+
         model, model_field = self.get_model()
         model_fields = get_model_fields(model, model_field)
 

@@ -1,3 +1,4 @@
+
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import PermissionDenied
 
@@ -15,7 +16,8 @@ class RoleBasedPermission(BasePermission):
         if not payload:
             raise PermissionDenied("Token payload not found.")
 
-        user_role = payload.get("role")
+        user_role = payload.get("roles")
+
         if not user_role:
             raise PermissionDenied("User role not found in token.")
 
@@ -28,7 +30,8 @@ class RoleBasedPermission(BasePermission):
         # Get the list of roles allowed for this method
         roles_for_method = allowed_roles.get(method, [])
 
-        if user_role not in roles_for_method:
-            raise PermissionDenied(f"Role '{user_role}' is not allowed to perform '{method}' operation.")
+        for role in user_role:
+            if role['role'] in roles_for_method:
+                return True
 
-        return True
+        raise PermissionDenied(f"Role '{user_role}' is not allowed to perform '{method}' operation.")

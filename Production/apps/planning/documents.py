@@ -1,6 +1,7 @@
 import mongoengine as mongo
 from django.utils import timezone
 
+from apps.core.documents import DateUser
 from utils.id_generator import id_generator
 
 import_type_dict = (
@@ -17,8 +18,7 @@ class PlanningSeries(mongo.Document):
 
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('PlanningSeries'))
 
-    create_date = mongo.DateTimeField(default=timezone.now)
-    create_user = mongo.StringField(default='')
+    create = mongo.EmbeddedDocumentField(DateUser)
 
     is_finished = mongo.BooleanField(default=False)
 

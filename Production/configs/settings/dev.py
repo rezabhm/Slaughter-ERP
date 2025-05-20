@@ -65,6 +65,6 @@ SIMPLE_JWT = {
 
 # mongoDB settings
 MONGODB_SETTINGS = {
-    "db": "configs",
-    "host": "mongodb://localhost:27017/configs",
+    "db": "SlaughterERP_Production",
+    "host": "mongodb://localhost:27017/SlaughterERP_Production",
 }

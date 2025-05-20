@@ -25,9 +25,9 @@ class PoultryCuttingProductionSeries(mongo.Document):
 
     product_owner = mongo.StringField(default='')
 
-    create = mongo.EmbeddedDocument(DateUser)
-    start = mongo.EmbeddedDocument(DateUser)
-    finished = mongo.EmbeddedDocument(DateUser)
+    create = mongo.EmbeddedDocumentField(DateUser)
+    start = mongo.EmbeddedDocumentField(DateUser)
+    finished = mongo.EmbeddedDocumentField(DateUser)
 
     status = mongo.StringField(default='pending', choices=production_series_status)
 
@@ -37,15 +37,15 @@ class PoultryCuttingImportProduct(mongo.Document):
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('PoultryCuttingProductionImport'))
 
     product = mongo.ReferenceField(Product)
-    product_information = mongo.EmbeddedDocument(ProductInformation)
+    product_information = mongo.EmbeddedDocumentField(ProductInformation)
     production_status = mongo.StringField(choices=production_series_status, default='pending')
 
     dispatch_unit = mongo.StringField(default='')
-    dispatch = mongo.EmbeddedDocument(CheckStatus)
+    dispatch = mongo.EmbeddedDocumentField(CheckStatus)
 
-    verified = mongo.EmbeddedDocument(CheckStatus)
-    cancelled = mongo.EmbeddedDocument(CheckStatus)
-    create_date = mongo.EmbeddedDocument(DateUser)
+    verified = mongo.EmbeddedDocumentField(CheckStatus)
+    cancelled = mongo.EmbeddedDocumentField(CheckStatus)
+    create_date = mongo.EmbeddedDocumentField(DateUser)
 
     poultry_cutting_production_series = mongo.ReferenceField(PoultryCuttingProductionSeries, default='')
 
@@ -55,12 +55,12 @@ class PoultryCuttingExportProduct(mongo.Document):
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('PoultryCuttingProductionExport'))
 
     product = mongo.ReferenceField(Product)
-    product_information = mongo.EmbeddedDocument(ProductInformation)
+    product_information = mongo.EmbeddedDocumentField(ProductInformation)
 
     receiver_delivery_unit = mongo.StringField(default='')
 
-    create = mongo.EmbeddedDocument(DateUser)
-    verified = mongo.EmbeddedDocument(CheckStatus)
+    create = mongo.EmbeddedDocumentField(DateUser)
+    verified = mongo.EmbeddedDocumentField(CheckStatus)
 
     poultry_cutting_production_series = mongo.ReferenceField(PoultryCuttingProductionSeries, default='')
 
@@ -69,11 +69,11 @@ class PoultryCuttingReturnProduct(mongo.Document):
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('ExportProduct'))
 
     product = mongo.ReferenceField(Product)
-    product_information = mongo.EmbeddedDocument(ProductInformation)
+    product_information = mongo.EmbeddedDocumentField(ProductInformation)
 
     return_type = mongo.StringField(choices=return_type_dict, default='return from production')
-    create = mongo.EmbeddedDocument(DateUser)
-    verified = mongo.EmbeddedDocument(CheckStatus)
+    create = mongo.EmbeddedDocumentField(DateUser)
+    verified = mongo.EmbeddedDocumentField(CheckStatus)
 
     is_useful = mongo.BooleanField(default=True)
     is_repack = mongo.BooleanField(default=False)
