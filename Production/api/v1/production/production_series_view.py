@@ -99,6 +99,11 @@
 #
 #     def get_queryset(self):
 #         return ProductionSeries.objects()
+from django.utils.decorators import method_decorator
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import serializers
+
 from apps.production.documents import ProductionSeries, ImportProduct
 from utils.custom_api_view import CustomAPIView
 from apps.production.serializers.production_series_serializer import ProductionSeriesSerializer
@@ -112,6 +117,82 @@ class TestSerializer(CustomSerializer):
         fields = '__all__'
 
 
+class TestSerializerPOST(CustomSerializer):
+
+    class Meta:
+        model = ProductionSeries
+        fields = ['product_owner', 'create']
+
+
+class SinglePatchSer(serializers.Serializer):
+    data = serializers.ListField(
+        child=serializers.IntegerField(),
+        help_text='List of object IDs to delete'
+    )
+
+
+x = lambda : swagger_auto_schema(
+        # method='patch',
+        operation_id='bulk_get_production_series',
+        request_body=SinglePatchSer,
+        responses={
+            200: openapi.Response(
+                description='Bulk delete result',
+                examples={
+                    'application/json': {
+                        "data": {
+                            "1": {"message": "object delete successfully", "status": 200},
+                            "2": {"message": "wrong id", "status": 400}
+                        }
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description='Invalid input',
+                examples={
+                    'application/json': {
+                        "message": "you must add data param to your data that must be list of data's id with <id>"
+                    }
+                }
+            )
+        },
+        operation_summary="Bulk delete objects by ID",
+        operation_description="Send a list of IDs to delete multiple objects. "
+                              "Returns success or error message for each item individually."
+    )
+
+xx = lambda : swagger_auto_schema(
+        # method='patch',
+        operation_id='bulk_get_productio',
+        request_body=SinglePatchSer,
+        responses={
+            200: openapi.Response(
+                description='Bulk delete result',
+                examples={
+                    'application/json': {
+                        "data": {
+                            "1": {"message": "object delete successfully", "status": 200},
+                            "2": {"message": "wrong id", "status": 400}
+                        }
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description='Invalid input',
+                examples={
+                    'application/json': {
+                        "message": "you must add data param to your data that must be list of data's id with <id>"
+                    }
+                }
+            )
+        },
+        operation_summary="Bulk delete objects by ID",
+        operation_description="Send a list of IDs to delete multiple objects. "
+                              "Returns success or error message for each item individually."
+    )
+
+@method_decorator(name='single_patch_request', decorator=x())
+@method_decorator(name='bulk_patch_request', decorator=xx())
 class TestAPIView(CustomAPIView):
 
     model = ProductionSeries
@@ -120,11 +201,10 @@ class TestAPIView(CustomAPIView):
     serializer_class = {
 
         'GET': TestSerializer,
-        'POST': TestSerializer,
+        'POST': TestSerializerPOST,
         'PATCH': TestSerializer,
         'PERFORM_ACTION': {
 
-            'test': TestSerializer,
         },
     }
 
@@ -138,8 +218,16 @@ class TestAPIView(CustomAPIView):
     }
 
     def get_queryset(self):
+
         return self.model.objects()
 
     def action_test(self, request, data):
-        print('run test action')
+        return {'message': 'successfully run', 'status': 200}
+
+    @swagger_auto_schema(
+        operation_summary="لیست داده‌ها به صورت گروهی",
+        operation_description="این متد برای گرفتن گروهی داده‌ها استفاده می‌شود.",
+        responses={200: openapi.Response(description="لیست موفق")},
+    )
+    def action_verify(self, request, data):
         return {'message': 'successfully run', 'status': 200}

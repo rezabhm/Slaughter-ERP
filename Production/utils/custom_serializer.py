@@ -149,7 +149,8 @@ class CustomSerializer:
 
             }
 
-    def get_object_fields_value(self, obj, name, field):
+    @staticmethod
+    def get_object_fields_value(obj, name, field):
 
         value = getattr(obj, name, None)
 
@@ -160,7 +161,5 @@ class CustomSerializer:
         return value
 
     def to_represent(self, obj_dict):
-
-
 
         return obj_dict
