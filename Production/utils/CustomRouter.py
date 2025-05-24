@@ -31,22 +31,26 @@ class CustomRouter:
             path(f'{url}<slug_field>/', view.as_view({
 
                 'get': 'single_get',
-                'post': 'single_post_request',
                 'patch': 'single_patch_request',
                 'delete': 'single_delete_request',
+            })),
+
+            path(f'{url}c/', view.as_view({
+
+                'post': 'single_post_request',
             }))
 
         ]
 
-        self.urls += [
-
-            path(f'{url}p/', view.as_view({
-
-                'post': 'request_handler'
-
-            })),
-
-        ]
+        # self.urls += [
+        #
+        #     path(f'{url}p/', view.as_view({
+        #
+        #         'post': 'request_handler'
+        #
+        #     })),
+        #
+        # ]
 
         for action_name, _ in action_list.items():
 

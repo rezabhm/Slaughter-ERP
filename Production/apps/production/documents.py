@@ -22,7 +22,8 @@ class ProductionSeries(mongo.Document):
 
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('ProductionSeries'))
 
-    create = mongo.EmbeddedDocumentField(DateUser, null=True, default=lambda req: DateUser(user=req.user_payload['username']))
+    create = mongo.EmbeddedDocumentField(DateUser, null=True, default=lambda req: DateUser(
+        user=req.user_payload['username']))
     start = mongo.EmbeddedDocumentField(DateUser, null=True)
     finish = mongo.EmbeddedDocumentField(DateUser, null=True)
 
