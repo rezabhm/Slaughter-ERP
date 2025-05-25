@@ -1,6 +1,9 @@
+import pprint
+
 import requests
 from rest_framework import serializers
 import mongoengine
+from rest_framework.exceptions import ValidationError
 
 from configs.settings.microservice import kernel_service_url
 
@@ -27,6 +30,10 @@ def get_model_fields(model, fields):
         if fields == '__all__' or name in fields
     }
 
+def get_all_model_fields(model):
+    return {
+        name: field for name, field in model._fields.items()
+    }
 
 # Map MongoEngine field types to Django REST Framework fields
 def map_field_type(field):
@@ -69,19 +76,31 @@ class MongoSerializer(serializers.Serializer):
                 self.fields[key] = drf_field(read_only=(key == 'id'),
                                              required=True if key in post_required_data else False)
 
-    def create(self, validated_data):
+    def create(self,request, validated_data):
         model, fields = self.get_model()
         model_fields = get_model_fields(model, fields)
+        all_model_fields = get_all_model_fields(model)
 
         # Handle default for EmbeddedDocumentFields
-        for key, field in model_fields.items():
-            if isinstance(field, mongoengine.EmbeddedDocumentField) and key not in validated_data:
+        for key, field in all_model_fields.items():
+            if key not in list(validated_data.keys()):
+                print(f'key : {key}')
                 if field.default:
-                    default_val = field.default() if callable(field.default) else field.default
-                    validated_data[key] = default_val
 
+                    try:
+                        default_val = field.default(request) if callable(field.default) else field.default
+                    except Exception:
+                        default_val = field.default() if callable(field.default) else field.default
+
+                    validated_data[key] = default_val
+                    print(f'{key} == {default_val}')
+
+        pprint.pprint(validated_data)
         validated_data = self.prepare_embedded_fields(validated_data)
-        return self.Meta.model(**validated_data).save()
+        pprint.pprint(validated_data)
+        model = self.Meta.model(**validated_data)
+        model.save()
+        return model
 
     def update(self, instance, validated_data):
         # Prepare embedded fields before updating
@@ -92,14 +111,47 @@ class MongoSerializer(serializers.Serializer):
         return instance
 
     def prepare_embedded_fields(self, validated_data):
-        # Convert embedded documents from dicts to proper EmbeddedDocument instances
         model, fields = self.get_model()
         model_fields = get_model_fields(model, fields)
+        # print('model fiedls : ', model_fields)
 
         for key, field in model_fields.items():
-            if isinstance(field, mongoengine.EmbeddedDocumentField) and isinstance(validated_data.get(key), dict):
-                embedded_doc = field.document_type(**validated_data[key])
-                validated_data[key] = embedded_doc
+
+
+            field_value = validated_data.get(key)
+
+            # فقط ادامه بده اگر EmbeddedDocumentField یا ReferenceField بود
+            if isinstance(field, (mongoengine.EmbeddedDocumentField, mongoengine.ReferenceField)):
+                document_cls = field.document_type
+
+                if isinstance(field_value, dict):
+                    # اگر dict بود، اول دنبال شیء مشابه بگرد
+                    search_query = {}
+
+                    # فقط key‌هایی که در فیلدهای document تعریف شدن رو در نظر بگیر
+                    for fk in field_value:
+                        if fk in document_cls._fields:
+                            search_query[fk] = field_value[fk]
+
+                    instance = document_cls.objects(**search_query).first()
+
+                    if instance:
+                        # اگر پیدا کردیم همون رو استفاده می‌کنیم
+                        validated_data[key] = instance
+                    else:
+                        # اگر نبود، جدید می‌سازیم
+                        instance = document_cls(**field_value)
+                        instance.save()
+                        validated_data[key] = instance
+
+                elif isinstance(field_value, str) or isinstance(field_value, int):
+                    # اگر فقط ID فرستاده شده
+                    try:
+                        instance = document_cls.objects.get(id=field_value)
+                        validated_data[key] = instance
+                    except document_cls.DoesNotExist:
+                        raise ValidationError({key: f"{document_cls.__name__} with id {field_value} does not exist."})
+
         return validated_data
 
     def get_model(self):
@@ -108,28 +160,25 @@ class MongoSerializer(serializers.Serializer):
         return getattr(meta, 'model', None), getattr(meta, 'fields', '__all__')
 
     def to_representation(self, instance):
-        # Base representation
+        print('yess')
         data = super().to_representation(instance)
+        print('noo')
+        model, model_fields = self.get_model()
+        model_fields = get_model_fields(model, model_fields)
 
-        model, model_field = self.get_model()
-        model_fields = get_model_fields(model, model_field)
-
-        # Handle ReferenceFields and EmbeddedDocuments
         for field_name, field in model_fields.items():
             value = getattr(instance, field_name, None)
 
-            if (isinstance(field, mongoengine.ReferenceField) or isinstance(field, mongoengine.EmbeddedDocumentField)) and value:
+            if (isinstance(field, mongoengine.EmbeddedDocumentField) or isinstance(field, mongoengine.ReferenceField)) and value:
                 try:
-                    # Convert MongoEngine document to dictionary
                     dt = value.to_mongo().to_dict()
-
-                    # Try to fetch external data for each field in embedded/reference doc
                     for key, val in dt.items():
-                        dt[key] = get_data_from_other_service(key, val)
-
+                        # فقط اگر key در kernel_service_url وجود داشته باشد، فچ شود
+                        if key in kernel_service_url and val:
+                            dt[key] = get_data_from_other_service(key, val)
                     data[field_name] = dt
-
                 except Exception as e:
-                    data[field_name] = {'id': str(value), 'error': str(e)}
+                    data[field_name] = {'error': str(e)}
 
         return data
+

@@ -145,61 +145,64 @@ class CustomAPIView(GenericAPIView, ViewSet):
 
     def check_action_data(self, action , data):
         MONGO_FIELD_TYPE_MAP = {
-            'StringField': str,
-            'IntField': int,
-            'FloatField': float,
-            'BooleanField': bool,
-            'DateTimeField': str,  # یا datetime.datetime اگه بررسی دقیق‌تری می‌خوای
-            'ListField': list,
-            'DictField': dict,
-            'EmbeddedDocumentField': dict,  # چون معمولاً ID یا دیکشنری هست
-            'ReferenceField': dict,  # چون معمولاً ID یا دیکشنری هست
-            # سایر فیلدها رو هم اضافه کن
+            'StringField': [str],
+            'IntField': [int],
+            'FloatField': [float],
+            'BooleanField': [bool],
+            'DateTimeField': [str],  # یا datetime.datetime
+            'ListField': [list],
+            'DictField': [dict],
+            'EmbeddedDocumentField': [dict],
+            'ReferenceField': [dict, str],
+            # سایر فیلدها...
         }
+
         serializer_class = getattr(self, 'serializer_class', None)
         serializer = serializer_class['PERFORM_ACTION']
         serializer = serializer.get(action, serializer_class['POST'])
+
         meta = getattr(serializer, 'Meta', None)
         model = getattr(meta, 'model', None)
         serializer_fields = getattr(meta, 'fields', '__all__')
 
         fields = {}
         for name, field in model._fields.items():
-
             if name in serializer_fields or serializer_fields == '__all__':
                 fields[name] = field.__class__.__name__
 
         response = {}
         response_status = True
+
         for name, field in fields.items():
-
-            if name not in list(data.keys()):
-
+            if name not in data:
                 response[name] = f'you must add <{name}> data'
                 response_status = False
                 continue
 
-            if not isinstance(data[name],MONGO_FIELD_TYPE_MAP[field]):
-                response[name] = f'you send <{name}> in correct format (acceptable format {field})'
+            expected_types = tuple(MONGO_FIELD_TYPE_MAP.get(field, []))
+            print(data[name])
+            print(expected_types)
+            print(name)
+            print(field)
+            print('\n\n')
+            if not isinstance(data[name], expected_types):
+                response[name] = f'you send <{name}> in incorrect format (acceptable format: {field})'
                 response_status = False
-                continue
-
 
         return response_status, response
 
     def check_post_data(self, data, many=False):
-
         MONGO_FIELD_TYPE_MAP = {
-            'StringField': str,
-            'IntField': int,
-            'FloatField': float,
-            'BooleanField': bool,
-            'DateTimeField': str,  # یا datetime.datetime اگه بررسی دقیق‌تری می‌خوای
-            'ListField': list,
-            'DictField': dict,
-            'EmbeddedDocumentField': dict,  # چون معمولاً ID یا دیکشنری هست
-            'ReferenceField': dict,  # چون معمولاً ID یا دیکشنری هست
-            # سایر فیلدها رو هم اضافه کن
+            'StringField': [str],
+            'IntField': [int],
+            'FloatField': [float],
+            'BooleanField': [bool],
+            'DateTimeField': [str],  # یا datetime.datetime
+            'ListField': [list],
+            'DictField': [dict],
+            'EmbeddedDocumentField': [dict],
+            'ReferenceField': [dict, str],  # قابل قبول: ID به صورت str یا دیکشنری
+            # سایر فیلدها...
         }
 
         serializer_class = getattr(self, 'serializer_class', None)
@@ -210,68 +213,138 @@ class CustomAPIView(GenericAPIView, ViewSet):
 
         fields = {}
         for name, field in model._fields.items():
-
             if name in serializer_fields or serializer_fields == '__all__':
                 fields[name] = field.__class__.__name__
 
         response = {}
         response_status = True
+
         if many:
-
             for key, value in enumerate(data):
-
+                print('value : ', value)
                 if isinstance(value, dict):
                     dt_response = []
                     for field_name, field in fields.items():
-                        if field_name not in list(value.keys()):
+                        if field_name not in value:
                             response_status = False
                             dt_response.append({
                                 'message': f'you must add <{field_name}> in data',
                                 'status': status.HTTP_400_BAD_REQUEST
                             })
                         else:
-
-                            if not isinstance(value[field_name], MONGO_FIELD_TYPE_MAP[field]):
+                            expected_types = tuple(MONGO_FIELD_TYPE_MAP.get(field, []))
+                            if not isinstance(value[field_name], expected_types):
                                 response_status = False
                                 dt_response.append({
                                     'message': f'you must send <{field_name}> in correct format, (acceptable format = {field})',
                                     'status': status.HTTP_400_BAD_REQUEST
                                 })
 
-                    response[key] = dt_response if len(dt_response) > 0 else {
-
-                            'message': 'you send correct data',
-                            'status': status.HTTP_200_OK
-
+                    response[key] = dt_response if dt_response else {
+                        'message': 'you send correct data',
+                        'status': status.HTTP_200_OK
                     }
 
                 else:
-
                     response_status = False
                     response[key] = {
-
                         'message': 'you must send dictionary format',
                         'status': status.HTTP_400_BAD_REQUEST
-
                     }
 
         else:
-
             value = data
             dt_response = {}
             for field_name, field in fields.items():
-                if field_name not in list(value.keys()):
+                if field_name not in value:
                     response_status = False
                     dt_response[field_name] = f'you must add <{field_name}> in data'
                 else:
-
-                    if not isinstance(value[field_name], MONGO_FIELD_TYPE_MAP[field]):
+                    expected_types = tuple(MONGO_FIELD_TYPE_MAP.get(field, []))
+                    if not isinstance(value[field_name], expected_types):
                         response_status = False
-                        dt_response[field_name] = f'you must send <{field_name}> in correct format, (acceptable format = {field})'
+                        dt_response[
+                            field_name] = f'you must send <{field_name}> in correct format, (acceptable format = {field})'
 
             response = dt_response
 
         return response_status, response
+
+
+    def check_patch_data(self, data, many=False):
+        MONGO_FIELD_TYPE_MAP = {
+            'StringField': [str],
+            'IntField': [int],
+            'FloatField': [float],
+            'BooleanField': [bool],
+            'DateTimeField': [str],  # یا datetime.datetime
+            'ListField': [list],
+            'DictField': [dict],
+            'EmbeddedDocumentField': [dict],
+            'ReferenceField': [dict, str],  # قابل قبول: ID به صورت str یا دیکشنری
+            # سایر فیلدها...
+        }
+
+        serializer_class = getattr(self, 'serializer_class', None)
+        serializer = serializer_class['PATCH']
+        meta = getattr(serializer, 'Meta', None)
+        model = getattr(meta, 'model', None)
+        serializer_fields = getattr(meta, 'fields', '__all__')
+
+        fields = {}
+        for name, field in model._fields.items():
+            if name in serializer_fields or serializer_fields == '__all__':
+                fields[name] = field.__class__.__name__
+
+        response = {}
+        response_status = True
+
+        if many:
+            for key, value in enumerate(data):
+                print('value : ', value)
+                if isinstance(value, dict):
+                    dt_response = []
+                    for field_name, field in fields.items():
+                        if field_name in value:
+                            expected_types = tuple(MONGO_FIELD_TYPE_MAP.get(field, []))
+                            if not isinstance(value[field_name], expected_types):
+                                response_status = False
+                                dt_response.append({
+                                    'message': f'you must send <{field_name}> in correct format, (acceptable format = {field})',
+                                    'status': status.HTTP_400_BAD_REQUEST
+                                })
+
+                    response[key] = dt_response if dt_response else {
+                        'message': 'you send correct data',
+                        'status': status.HTTP_200_OK
+                    }
+
+                else:
+                    response_status = False
+                    response[key] = {
+                        'message': 'you must send dictionary format',
+                        'status': status.HTTP_400_BAD_REQUEST
+                    }
+
+        else:
+            value = data
+            dt_response = {}
+            for field_name, field in fields.items():
+                if field_name not in value:
+                    response_status = False
+                    dt_response[field_name] = f'you must add <{field_name}> in data'
+                else:
+                    expected_types = tuple(MONGO_FIELD_TYPE_MAP.get(field, []))
+                    if not isinstance(value[field_name], expected_types):
+                        response_status = False
+                        dt_response[
+                            field_name] = f'you must send <{field_name}> in correct format, (acceptable format = {field})'
+
+            response = dt_response
+
+        return response_status, response
+
+
 
     def request_handler(self, request, *args, **kwargs):
         if request.method == 'GET':
@@ -409,21 +482,21 @@ class CustomAPIView(GenericAPIView, ViewSet):
                                      f'you must add data param to your data that must be list of data"s id'
                                      f' with <{lookup_field}>'}, status=status.HTTP_400_BAD_REQUEST)
 
-        for id_ in data:
+        for idx, id_ in enumerate(data):
 
             if not isinstance(id_, str) and not isinstance(id_, int):
-                return JsonResponse(data={
-                    'message': f'id must be str or int'},
-                                    status=status.HTTP_400_BAD_REQUEST)
+
+                response[str(idx)] = {'message': 'wrong id format , id must be str or int', "status": 400, 'id': id_}
+                continue
 
             obj = self.get_query({lookup_field: id_})
 
             if isinstance(obj, JsonResponse) or not obj:
 
-                response[id_] = obj if obj else {'message': 'wrong id ', "status": 400}
+                response[id_] = obj if obj else {'message': 'wrong id ', "status": 400, 'id': id_}
             else:
                 obj.delete()
-                response[id_] = {'message': 'object delete successfully ', 'status': 200}
+                response[id_] = {'message': 'object delete successfully ', 'status': 200, 'id': id_}
 
         return JsonResponse(data={'data': response}, status=status.HTTP_200_OK)
 
@@ -440,14 +513,19 @@ class CustomAPIView(GenericAPIView, ViewSet):
 
         model_serializer = serializer(obj, many=False)
 
-        validated_data = [request.data]
-        model_serializer.update(validated_data)
+        validated_data = request.data
+        model_serializer.update([validated_data])
 
         return JsonResponse(data={'message': 'data are update', 'data': model_serializer.data},
                             status=status.HTTP_200_OK)
 
     def bulk_patch_request(self, request):
         serializer = self.serializer_class['PATCH']
+        request_data = [value for key, value in request.data.items()]
+        response_status, response_data = self.check_patch_data(data=request_data, many=True)
+
+        if not response_status:
+            return JsonResponse(data=response_data, status=status.HTTP_400_BAD_REQUEST)
 
         valid_data_list = []
         object_list = []
@@ -586,10 +664,11 @@ class CustomAPIView(GenericAPIView, ViewSet):
 
             return JsonResponse(data={'data': model_serializer.data}, status=status.HTTP_200_OK)
 
-
     def bulk_post_request(self, request, *args, **kwargs):
 
-        request_data = request.data
+        request_data = request.data.get('data', None)
+        if not request_data:
+            return JsonResponse(data={'message': 'you must send data parameter'} , status=status.HTTP_400_BAD_REQUEST)
 
         # single create
         serializer_class = getattr(self, 'serializer_class', None)
@@ -602,13 +681,13 @@ class CustomAPIView(GenericAPIView, ViewSet):
             return JsonResponse(data={'message': 'serializer class for post method didnt set'},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        data = [value for _, value in request_data.data.items() if isinstance(value, dict)]
-        response_status, response_data = self.check_post_data(data=data, many=True)
+        print(request_data)
+        response_status, response_data = self.check_post_data(data=request_data, many=True)
 
         if not response_status:
             return JsonResponse(data=response_data, status=status.HTTP_400_BAD_REQUEST)
 
-        model_serializer = serializer(data, many=True)
+        model_serializer = serializer(request_data, many=True)
         model_serializer.create(request)
 
         return JsonResponse(data={'data': model_serializer.data}, status=status.HTTP_200_OK)

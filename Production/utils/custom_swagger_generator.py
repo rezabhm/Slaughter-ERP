@@ -39,10 +39,14 @@ def custom_swagger_generator(serializer_class, method, many=True):
 
     if many:
         response_example = {
-            "0": example_object,
-            "1": example_object,
-            "2": example_object,
-            "...": {}
+            'data': [
+
+                {"0": example_object},
+                {"1": example_object},
+                {"2": example_object},
+                {"...": {}}
+
+            ]
         }
     else:
         response_example = example_object
@@ -133,7 +137,7 @@ def custom_swagger_generator(serializer_class, method, many=True):
             "request_body": openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={
-                    "ids": openapi.Schema(
+                    "data": openapi.Schema(
                         type=openapi.TYPE_ARRAY,
                         items=openapi.Schema(type=openapi.TYPE_STRING)
                     )
@@ -177,7 +181,7 @@ def action_swagger_documentation(action_name, summaries='', description='', seri
         'DateTimeField': openapi.FORMAT_DATETIME,
         'EmbeddedDocumentField': openapi.TYPE_OBJECT,
         'ListField': openapi.TYPE_ARRAY,
-        'ReferenceField': openapi.TYPE_STRING,  # assume referenced by ID
+        'ReferenceField': openapi.TYPE_OBJECT,  # assume referenced by ID
     }
 
     serializer = serializer_class()

@@ -1,5 +1,3 @@
-import mongoengine
-
 from apps.core.documents import *
 from utils.id_generator import id_generator
 
@@ -88,22 +86,30 @@ class ImportProduct(mongo.Document):
     car = mongo.ReferenceField(Car, null=True)
     product = mongo.ReferenceField(Product, null=True)
 
-    slaughter_type = mongo.StringField(default='', choices=())
-    order_type = mongo.StringField(default='', choices=())
+    slaughter_type = mongo.StringField(default='Slaughterhouse delivery', choices=(
+        ('Slaughterhouse delivery', 'Slaughterhouse delivery'),
+        ('Poultry farm door', 'Poultry farm door')
+    ))
+    order_type = mongo.StringField(default='company', choices=(
+        ('company', 'company'),
+        ('Purchase commission by the company', 'Purchase commission by the company'),
+        ('Purchase commission by the product owner', 'Purchase commission by the product owner'),
+    ))
 
-    first_step = mongo.EmbeddedDocumentField(FirstStepImportCar, null=True)
-    second_step = mongo.EmbeddedDocumentField(SecondStepImportCar, null=True)
-    third_step = mongoengine.EmbeddedDocumentField(ThirdStepImportCar, null=True)
-    fourth_step = mongo.EmbeddedDocumentField(FourthStepImportCar, null=True)
-    fifth_step = mongo.EmbeddedDocumentField(FifthStepImportCar, null=True)
-    sixth_step = mongo.EmbeddedDocumentField(SixthStepImportCar, null=True)
-    seventh_step = mongo.EmbeddedDocumentField(SeventhStepImportCar, null=True)
+    first_step = mongo.EmbeddedDocumentField(FirstStepImportCar, )
+    second_step = mongo.EmbeddedDocumentField(SecondStepImportCar, )
+    third_step = mongo.EmbeddedDocumentField(ThirdStepImportCar, )
+    fourth_step = mongo.EmbeddedDocumentField(FourthStepImportCar, )
+    fifth_step = mongo.EmbeddedDocumentField(FifthStepImportCar, )
+    sixth_step = mongo.EmbeddedDocumentField(SixthStepImportCar, )
+    seventh_step = mongo.EmbeddedDocumentField(SeventhStepImportCar, )
 
-    is_planned = mongo.EmbeddedDocumentField(CheckStatus, null=True)
-    is_cancelled = mongo.EmbeddedDocumentField(CheckStatus, null=True)
-    is_verified = mongo.EmbeddedDocumentField(CheckStatus, null=True)
+    is_planned = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(user_date=DateUser(user=req.user_payload['username'])))
+    is_cancelled = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(user_date=DateUser(user=req.user_payload['username'])))
+    is_verified = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(user_date=DateUser(user=req.user_payload['username'])))
 
-    create = mongo.EmbeddedDocumentField(DateUser, null=True)
+    create = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(
+        user=req.user_payload['username']))
 
     production_series = mongo.ReferenceField(ProductionSeries, null=True)
 

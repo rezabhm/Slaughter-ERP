@@ -27,8 +27,8 @@ class Car(mongo.Document):
 class Product(mongo.Document):
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('Product'))
 
-    product = mongo.IntField(default='')
-    product_owner = mongo.IntField(default='')
+    product = mongo.IntField(default=0)
+    product_owner = mongo.IntField(default=0)
 
 
 class CheckStatus(mongo.EmbeddedDocument):

@@ -1,9 +1,11 @@
-from api.v1.production.production_series.production_series_view import ProductionSeriesAPIView
+from api.v1.production.import_product.view import ImportProductByCarAPIView
+from api.v1.production.production_series.view import ProductionSeriesAPIView
 from utils.CustomRouter import CustomRouter
 
 default_router = CustomRouter()
 
 default_router.register('production-series', ProductionSeriesAPIView)
+default_router.register('production/import-product-by-car', ImportProductByCarAPIView)
 
 urlpatterns = default_router.urls
 

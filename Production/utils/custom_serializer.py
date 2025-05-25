@@ -18,64 +18,55 @@ class CustomSerializer:
             self.pars_object()
 
     def create(self, request):
-
         model_list = []
         for validated_data in self.queryset:
-
+            data = {}
             meta = getattr(self.__class__, 'Meta', None)
             model = getattr(meta, 'model', None)
             fields = getattr(meta, 'fields', [])
 
             if model:
-
-                instance = model()
-
                 for name, field in model._fields.items():
                     if name == 'id':
                         continue
 
                     if name in fields or fields == '__all__':
-
                         value = validated_data.get(name, None)
-                        if value:
 
-                            if field.__class__.__name__ in ['EmbeddedDocumentField', 'ReferenceField']:
-                                related_class = field.document_type
+                        if field.__class__.__name__ in ['EmbeddedDocumentField', 'ReferenceField']:
+                            related_class = field.document_type
 
-                                if isinstance(value, dict):
+                            if isinstance(value, dict):
+                                related_instance = related_class.objects(**value).first()
+                                if not related_instance:
                                     related_instance = related_class(**value)
-
                                     if field.__class__.__name__ == 'ReferenceField':
-                                        related_instance.save()  # فقط برای ReferenceField نیاز به ذخیره هست
+                                        related_instance.save()
 
-                                    value = related_instance
-                                else:
-                                    # اگر value دیکشنری نیست، شاید خودش instance باشه یا id
-                                    if field.__class__.__name__ == 'ReferenceField' and isinstance(value,
-                                                                                                   (str, ObjectId)):
-                                        try:
-                                            value = related_class.objects.get(id=value)
-                                        except related_class.DoesNotExist:
-                                            raise ValueError(f"{related_class.__name__} with id {value} not found")
+                                value = related_instance
 
-                            setattr(instance, name, value)
+                            elif isinstance(value, (str, ObjectId)):
+                                try:
+                                    value = related_class.objects.get(id=value)
+                                except related_class.DoesNotExist:
+                                    value = None
 
-                        else:
+                        if value is None and hasattr(field, 'default'):
+                            default_value = field.default
+                            value = default_value(request) if callable(default_value) else default_value
 
-                            default_value = None
-                            if hasattr(field, 'default'):
-                                default_value = field.default
+                        data[name] = value
 
-                                if callable(default_value):
-                                    try:
-                                        default_value = default_value(request)
-                                    except:
-                                        default_value = default_value()
+                    else:
+                        default_value = None
+                        if hasattr(field, 'default'):
+                            default_value = field.default
+                            default_value = default_value(request) if callable(default_value) else default_value
 
-                            setattr(instance, name, default_value)
+                        data[name] = default_value
 
+                instance = model(**data)
                 instance.save()
-
                 model_list.append(instance)
 
         self.data = []
@@ -83,37 +74,33 @@ class CustomSerializer:
         self.pars_object()
 
     def update(self, validated_data):
-
         meta = getattr(self.__class__, 'Meta', None)
         serializer_fields = getattr(meta, 'fields', [])
 
-        for instance, validated_data in zip(self.queryset, validated_data):
-
+        for instance, validated in zip(self.queryset, validated_data):
             fields_dict = {name: field for name, field in instance._fields.items()}
 
-            for key, value in validated_data.items():
-
-                if (key in serializer_fields or serializer_fields == '__all__') and key in list(fields_dict.keys()):
-
+            for key, value in validated.items():
+                if (key in serializer_fields or serializer_fields == '__all__') and key in fields_dict:
                     field = fields_dict[key]
+
                     if field.__class__.__name__ in ['EmbeddedDocumentField', 'ReferenceField']:
                         related_class = field.document_type
 
                         if isinstance(value, dict):
-                            related_instance = related_class(**value)
-
-                            if field.__class__.__name__ == 'ReferenceField':
-                                related_instance.save()  # فقط برای ReferenceField نیاز به ذخیره هست
+                            related_instance = related_class.objects(**value).first()
+                            if not related_instance:
+                                related_instance = related_class(**value)
+                                if field.__class__.__name__ == 'ReferenceField':
+                                    related_instance.save()
 
                             value = related_instance
-                        else:
-                            # اگر value دیکشنری نیست، شاید خودش instance باشه یا id
-                            if field.__class__.__name__ == 'ReferenceField' and isinstance(value,
-                                                                                           (str, ObjectId)):
-                                try:
-                                    value = related_class.objects.get(id=value)
-                                except related_class.DoesNotExist:
-                                    raise ValueError(f"{related_class.__name__} with id {value} not found")
+
+                        elif isinstance(value, (str, ObjectId)):
+                            try:
+                                value = related_class.objects.get(id=value)
+                            except related_class.DoesNotExist:
+                                value = None
 
                     setattr(instance, key, value)
 

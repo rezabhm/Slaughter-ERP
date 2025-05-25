@@ -28,7 +28,7 @@ class CustomRouter:
 
             })),
 
-            path(f'{url}<slug_field>/', view.as_view({
+            path(f'{url}s/<slug_field>/', view.as_view({
 
                 'get': 'single_get',
                 'patch': 'single_patch_request',
