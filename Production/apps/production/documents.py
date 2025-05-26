@@ -75,6 +75,7 @@ class SixthStepImportCar(mongo.EmbeddedDocument):
 class SeventhStepImportCar(mongo.EmbeddedDocument):
 
     product_slaughter_number = mongo.IntField(default=1)
+    finish = mongo.EmbeddedDocumentField(DateUser)
 
 
 class ImportProduct(mongo.Document):
@@ -104,9 +105,12 @@ class ImportProduct(mongo.Document):
     sixth_step = mongo.EmbeddedDocumentField(SixthStepImportCar, )
     seventh_step = mongo.EmbeddedDocumentField(SeventhStepImportCar, )
 
-    is_planned = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(user_date=DateUser(user=req.user_payload['username'])))
-    is_cancelled = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(user_date=DateUser(user=req.user_payload['username'])))
-    is_verified = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(user_date=DateUser(user=req.user_payload['username'])))
+    is_planned = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(
+        user_date=DateUser(user=req.user_payload['username'])))
+    is_cancelled = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(
+        user_date=DateUser(user=req.user_payload['username'])))
+    is_verified = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(
+        user_date=DateUser(user=req.user_payload['username'])))
 
     create = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(
         user=req.user_payload['username']))
@@ -116,23 +120,28 @@ class ImportProduct(mongo.Document):
 
 class ImportProductFromWareHouseProductDescription(mongo.Document):
 
+    id = mongo.StringField(primary_key=True, default=lambda: id_generator('ImportProductFromWareHouseProductDescription'))
     warehouse_unit = mongo.StringField(default='')
     product = mongo.ReferenceField(Product)
 
 
-class ImportProductFromWarHouse(mongo.Document):
+class ImportProductFromWareHouse(mongo.Document):
 
-    id = mongo.StringField(primary_key=True, default=lambda: id_generator('ImportProductFromWarHouse'))
+    id = mongo.StringField(primary_key=True, default=lambda: id_generator('ImportProductFromWareHouse'))
     level = mongo.IntField(default=1)
 
     product_description = mongo.ReferenceField(ImportProductFromWareHouseProductDescription)
     product_information = mongo.EmbeddedDocumentField(ProductInformation)
 
-    is_verified = mongo.EmbeddedDocumentField(CheckStatus)
-    is_planned = mongo.EmbeddedDocumentField(CheckStatus)
-    is_cancelled = mongo.EmbeddedDocumentField(CheckStatus)
+    is_verified = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(
+        user_date=DateUser(user=req.user_payload['username'])))
+    is_planned = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(
+        user_date=DateUser(user=req.user_payload['username'])))
+    is_cancelled = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(
+        user_date=DateUser(user=req.user_payload['username'])))
 
-    create_date = mongo.EmbeddedDocumentField(DateUser)
+    create_date = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(
+        user=req.user_payload['username']))
     production_start_date = mongo.EmbeddedDocumentField(DateUser)
     production_finished_date = mongo.EmbeddedDocumentField(DateUser)
 

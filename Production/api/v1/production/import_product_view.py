@@ -3,9 +3,9 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework import mixins, filters
 from django_filters.rest_framework import DjangoFilterBackend
 
-from apps.production.documents import ImportProduct, ImportProductFromWarHouse
+from apps.production.documents import ImportProduct, ImportProductFromWareHouse
 from apps.production.serializers.import_product_serializer import ImportProductSerializer, \
-    ImportProductFromWarHouseSerializer
+    ImportProductFromWareHouseSerializer
 from utils.jwt_validator import CustomJWTAuthentication
 from utils.post_request import CustomAPIView
 from utils.request_permission import RoleBasedPermission
@@ -47,7 +47,7 @@ class ImportProductCRUDAPIView(
         return ImportProduct.objects()
 
 
-class ImportProductFromWarHouseCRUDAPIView(
+class ImportProductFromWareHouseCRUDAPIView(
 
     GenericViewSet,
     mixins.CreateModelMixin,
@@ -60,7 +60,7 @@ class ImportProductFromWarHouseCRUDAPIView(
 
     authentication_classes = [CustomJWTAuthentication]
     permission_classes = [RoleBasedPermission]
-    serializer_class = ImportProductFromWarHouseSerializer
+    serializer_class = ImportProductFromWareHouseSerializer
 
     allowed_roles = {
 
@@ -74,13 +74,13 @@ class ImportProductFromWarHouseCRUDAPIView(
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
 
-    search_fields = [name for name, _ in ImportProductFromWarHouse._fields.items()]
-    ordering_fields = [name for name in ImportProductFromWarHouse._fields if 'date' in name.lower()]
+    search_fields = [name for name, _ in ImportProductFromWareHouse._fields.items()]
+    ordering_fields = [name for name in ImportProductFromWareHouse._fields if 'date' in name.lower()]
     ordering = 'create_date'
-    filterset_fields = [name for name, _ in ImportProductFromWarHouse._fields.items()]
+    filterset_fields = [name for name, _ in ImportProductFromWareHouse._fields.items()]
 
     def get_queryset(self):
-        return ImportProductFromWarHouse.objects()
+        return ImportProductFromWareHouse.objects()
 
 
 class ProductionImportByCarFirstStepAPIView(CustomAPIView):

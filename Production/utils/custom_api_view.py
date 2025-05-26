@@ -714,6 +714,7 @@ class CustomAPIView(GenericAPIView, ViewSet):
 
         model_serializer = serializer(request_data, many=False)
         model_serializer.create(request)
+        print(model_serializer.data)
 
         return JsonResponse(data={'data': model_serializer.data}, status=status.HTTP_200_OK)
 

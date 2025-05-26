@@ -51,8 +51,8 @@ class ProductionSeriesAPIView(CustomAPIView):
     def get_queryset(self):
         return ProductionSeries.objects()
 
-    def action_start(self, request, value):
-        return production_series_change_status(request, value, self.lookup_field, self.get_query, ps_status='start')
+    def action_start(self, request, slug=None):
+        return production_series_change_status(request, slug, self.lookup_field, self.get_query, ps_status='start')
 
-    def action_finish(self, request, value):
-        return production_series_change_status(request, value, self.lookup_field, self.get_query, ps_status='finish')
+    def action_finish(self, request, slug=None):
+        return production_series_change_status(request, slug, self.lookup_field, self.get_query, ps_status='finish')

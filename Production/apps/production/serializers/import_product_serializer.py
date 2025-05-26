@@ -1,4 +1,4 @@
-from apps.production.documents import ImportProduct, ImportProductFromWarHouse
+from apps.production.documents import ImportProduct, ImportProductFromWareHouse
 from utils.custom_serializer import CustomSerializer
 from utils.mongo_serializer import MongoSerializer
 
@@ -18,8 +18,15 @@ class ImportProductSerializerPOST(CustomSerializer):
                   'production_series']
 
 
-class ImportProductFromWarHouseSerializer(CustomSerializer):
+class ImportProductFromWareHouseSerializer(CustomSerializer):
 
     class Meta:
-        model = ImportProductFromWarHouse
+        model = ImportProductFromWareHouse
         fields = '__all__'
+
+
+class ImportProductFromWareHouseSerializerPOST(CustomSerializer):
+
+    class Meta:
+        model = ImportProductFromWareHouse
+        fields = ['product_description', 'product_information', 'production_series']

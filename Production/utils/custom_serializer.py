@@ -37,13 +37,16 @@ class CustomSerializer:
                             related_class = field.document_type
 
                             if isinstance(value, dict):
-                                related_instance = related_class.objects(**value).first()
-                                if not related_instance:
-                                    related_instance = related_class(**value)
-                                    if field.__class__.__name__ == 'ReferenceField':
+                                if field.__class__.__name__ == 'ReferenceField':
+                                    # For ReferenceField, try to retrieve or create and save
+                                    related_instance = related_class.objects(**value).first()
+                                    if not related_instance:
+                                        related_instance = related_class(**value)
                                         related_instance.save()
-
-                                value = related_instance
+                                    value = related_instance
+                                elif field.__class__.__name__ == 'EmbeddedDocumentField':
+                                    # For EmbeddedDocumentField, just create the embedded instance
+                                    value = related_class(**value)
 
                             elif isinstance(value, (str, ObjectId)):
                                 try:
@@ -149,4 +152,27 @@ class CustomSerializer:
 
     def to_represent(self, obj_dict):
 
-        return obj_dict
+        return self.correct_dict(obj_dict)
+
+    def correct_dict(self, obj):
+        for key, value in obj.items():
+            obj[key] = self.correct_obj_value(value)
+
+        return obj
+
+    def correct_obj_value(self, value):
+
+        if isinstance(value, dict):
+            return self.correct_dict(value)
+
+        elif isinstance(value, list):
+            new_list = []
+            for dt in value:
+                new_list.append(self.correct_obj_value(dt))
+            return new_list
+
+        elif isinstance(value, ObjectId):
+            return str(value)
+
+        else:
+            return value
