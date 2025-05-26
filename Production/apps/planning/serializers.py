@@ -1,15 +1,26 @@
 from apps.planning.documents import PlanningSeries, PlanningSeriesCell
-from utils.mongo_serializer import MongoSerializer
+from utils.custom_serializer import CustomSerializer
 
 
-class PlanningSeriesSerializer(MongoSerializer):
-
+class PlanningSeriesSerializer(CustomSerializer):
     class Meta:
         model = PlanningSeries
         fields = '__all__'
 
 
-class PlanningSeriesCellSerializer(MongoSerializer):
+class PlanningSeriesSerializerPOST(CustomSerializer):
+    class Meta:
+        model = PlanningSeries
+        fields = []
+
+
+class PlanningSeriesCellSerializer(CustomSerializer):
     class Meta:
         model = PlanningSeriesCell
         fields = '__all__'
+
+
+class PlanningSeriesCellSerializerPOST(CustomSerializer):
+    class Meta:
+        model = PlanningSeriesCell
+        fields = ['priority', 'import_type', 'import_id']

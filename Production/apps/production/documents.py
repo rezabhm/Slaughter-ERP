@@ -157,8 +157,10 @@ class ExportProduct(mongo.Document):
 
     product_information = mongo.EmbeddedDocumentField(ProductInformation)
 
-    create = mongo.EmbeddedDocumentField(DateUser)
-    is_verified_by_receiver_delivery_unit_user = mongo.EmbeddedDocumentField(CheckStatus)
+    create = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(
+        user=req.user_payload['username']))
+    is_verified_by_receiver_delivery_unit_user = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(
+        user_date=DateUser(user=req.user_payload['username'])))
 
     production_series = mongo.ReferenceField(ProductionSeries, default='')
 
@@ -172,8 +174,10 @@ class ReturnProduct(mongo.Document):
     product_information = mongo.EmbeddedDocumentField(ProductInformation)
     return_type = mongo.StringField(choices=return_type_dict, default='return from production')
 
-    create = mongo.EmbeddedDocumentField(DateUser)
-    verified = mongo.EmbeddedDocumentField(CheckStatus)
+    create = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(
+        user=req.user_payload['username']))
+    verified = mongo.EmbeddedDocumentField(CheckStatus, default=lambda req: CheckStatus(
+        user_date=DateUser(user=req.user_payload['username'])))
 
     is_useful = mongo.BooleanField(default=True)
     is_repack = mongo.BooleanField(default=False)
