@@ -12,7 +12,7 @@ class ProductionSeriesSerializer(CustomSerializer):
         fields = '__all__'
 
 
-class ProductionSeriesSerializerPOST(serializers.Serializer):
+class ProductionSeriesSerializerPOST(CustomSerializer):
 
     class Meta:
         model = ProductionSeries

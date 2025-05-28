@@ -41,10 +41,10 @@ class ProductionSeriesAPIView(CustomAPIView):
 
     allowed_roles = {
 
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
+        'GET': ['any'],
+        'POST': ['any'],
+        'PATCH': ['any'],
+        'DELETE': ['any'],
 
     }
 

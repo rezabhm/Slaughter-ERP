@@ -30,6 +30,10 @@ class RoleBasedPermission(BasePermission):
         # Get the list of roles allowed for this method
         roles_for_method = allowed_roles.get(method, [])
 
+        for role in roles_for_method:
+            if role == 'any':
+                return True
+
         for role in user_role:
             if role['role'] in roles_for_method:
                 return True

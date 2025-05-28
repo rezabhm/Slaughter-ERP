@@ -1,10 +1,12 @@
 from apps.poultry_cutting_production.documents import PoultryCuttingReturnProduct
 from utils.custom_serializer import CustomSerializer
 
+
 class PoultryCuttingReturnProductSerializer(CustomSerializer):
     class Meta:
         model = PoultryCuttingReturnProduct
         fields = '__all__'
+
 
 class PoultryCuttingReturnProductSerializerPOST(CustomSerializer):
     class Meta:

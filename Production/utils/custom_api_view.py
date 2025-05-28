@@ -681,7 +681,6 @@ class CustomAPIView(GenericAPIView, ViewSet):
             return JsonResponse(data={'message': 'serializer class for post method didnt set'},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        print(request_data)
         response_status, response_data = self.check_post_data(data=request_data, many=True)
 
         if not response_status:
