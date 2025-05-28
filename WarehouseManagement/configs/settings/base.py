@@ -32,8 +32,8 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
 
     # installed apps
-    'apps.supplies_warehouse',
-    'apps.production_warehouse',
+    'apps.core',
+    'apps.warehouse',
 
     'django.contrib.admin',
     'django.contrib.auth',
