@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from configs.settings.base import *
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
