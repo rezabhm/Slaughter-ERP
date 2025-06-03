@@ -84,7 +84,8 @@ class Invoice(mongo.Document):
     description = mongo.StringField(required=True, default="")
     seller = mongo.ReferenceField(Seller, required=True)
     is_paid = mongo.StringField(default=False)
-    product_list = mongo.ListField(PurchaseOrder)
+
+    product_list = mongo.ListField(mongo.ReferenceField(PurchaseOrder))
 
     meta = {'collection': 'invoice'}
 

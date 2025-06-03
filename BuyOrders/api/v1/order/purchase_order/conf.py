@@ -6,4 +6,7 @@ status_dict = {
     'approved_by_finance': {'message': 'Purchase order successfully verified by finance'},
     'approved_by_purchaser': {'message': 'Purchase order successfully approved by purchaser'},
     'purchased': {'message': 'Purchase order successfully marked as purchased'},
+    'received': {'message': 'Purchase order successfully marked as received'},
+    'done': {'message': 'Purchase order successfully marked as done'},
+    'cancelled': {'message': 'Purchase order successfully marked as cancelled'},
 }
