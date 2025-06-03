@@ -18,11 +18,14 @@ status_dict = (
 )
 
 
-# Document for ProductionOrder
+# Document for buy
 class ProductionOrder(mongo.Document):
-    id = mongo.StringField(primary_key=True, default=lambda: id_generator('ProductionOrder'))
+    id = mongo.StringField(primary_key=True, default=lambda: id_generator('buy'))
     car = mongo.ReferenceField(Car, required=True)
     order_information = mongo.ReferenceField(OrderProductInformation, required=True)
+
+    required_weight = mongo.FloatField(default=0.0)
+    required_number = mongo.IntField(default=0)
 
     weight = mongo.IntField()
     quality = mongo.StringField()
