@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     # apps
     'apps.core',
     'apps.sale',
+    'apps.order',
 
     'django.contrib.admin',
     'django.contrib.auth',
