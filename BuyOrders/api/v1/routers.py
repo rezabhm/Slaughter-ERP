@@ -3,7 +3,7 @@ from api.v1.order.bank_account.view import BankAccountAPIView
 from api.v1.order.invoice.view import InvoiceAPIView
 from api.v1.order.payment.view import PaymentAPIView
 from api.v1.order.purchase_order.view import PurchaseOrderAPIView
-from utils.CustomRouter import CustomRouter
+from utils.CustomRouter.CustomRouter import CustomRouter
 
 router = CustomRouter()
 

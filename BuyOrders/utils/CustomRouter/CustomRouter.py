@@ -42,16 +42,6 @@ class CustomRouter:
 
         ]
 
-        # self.urls += [
-        #
-        #     path(f'{url}p/', view.as_view({
-        #
-        #         'post': 'request_handler'
-        #
-        #     })),
-        #
-        # ]
-
         for action_name, _ in action_list.items():
 
             self.urls += [

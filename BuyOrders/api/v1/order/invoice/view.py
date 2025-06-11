@@ -1,14 +1,12 @@
 from django.utils.decorators import method_decorator
-from rest_framework import status
-from django.http import JsonResponse
 
 from api.v1.order.invoice.conf import *
 from api.v1.order.invoice.swagger import *
 from api.v1.order.invoice.utils import handle_add_purchase_orders
 from apps.orders.documents import Invoice
 from apps.orders.serializers import InvoiceSerializer, InvoiceSerializerPOST
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
 @method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=InvoiceSerializerPOST, method='bulk_post', many=True))

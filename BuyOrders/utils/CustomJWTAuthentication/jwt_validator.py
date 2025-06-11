@@ -27,15 +27,15 @@ class CustomJWTAuthentication(JWTAuthentication):
             if not user_id:
                 raise AuthenticationFailed("Invalid token: no user_id found")
 
-            try:
-                user = User.objects.get(id=user_id)
-            except User.DoesNotExist:
-                raise AuthenticationFailed("User not found")
+            # try:
+            #     user = User.objects.get(id=user_id)
+            # except User.DoesNotExist:
+            #     raise AuthenticationFailed("User not found")
 
             # Attach payload for future use (optional)
             request.user_payload = payload
 
-            return user, token
+            return None, token
 
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Token has expired")

@@ -56,7 +56,10 @@ class CustomSerializer:
 
                         if value is None and hasattr(field, 'default'):
                             default_value = field.default
-                            value = default_value(request) if callable(default_value) else default_value
+                            try:
+                                default_value = default_value(request) if callable(default_value) else default_value
+                            except:
+                                default_value = default_value() if callable(default_value) else default_value
 
                         data[name] = value
 
@@ -64,7 +67,10 @@ class CustomSerializer:
                         default_value = None
                         if hasattr(field, 'default'):
                             default_value = field.default
-                            default_value = default_value(request) if callable(default_value) else default_value
+                            try:
+                                default_value = default_value(request) if callable(default_value) else default_value
+                            except:
+                                default_value = default_value() if callable(default_value) else default_value
 
                         data[name] = default_value
 

@@ -1,6 +1,6 @@
 from apps.buy.documents import ProductionOrder
 from apps.core.documents import CheckStatus
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class VerifiedActionSwagger(CustomSerializer):

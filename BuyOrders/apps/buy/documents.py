@@ -31,7 +31,7 @@ class ProductionOrder(mongo.Document):
     quality = mongo.StringField()
 
     status = mongo.StringField(choices=status_dict, default='pending for verified')
-    create = mongo.EmbeddedDocumentField(DateUser, default=lambda: DateUser())
+    create = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(user=req.user_payload['username']))
 
     verified = mongo.EmbeddedDocumentField(CheckStatus)
     received = mongo.EmbeddedDocumentField(CheckStatus)

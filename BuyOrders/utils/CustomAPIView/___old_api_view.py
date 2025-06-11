@@ -101,8 +101,8 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from utils.jwt_validator import CustomJWTAuthentication
-from utils.request_permission import RoleBasedPermission
+from utils.CustomJWTAuthentication.jwt_validator import CustomJWTAuthentication
+from utils.permissions import RoleBasedPermission
 class SinglePatchSeddddr(serializers.Serializer):
     data = serializers.ListField(
         child=serializers.IntegerField(),
@@ -180,11 +180,6 @@ class CustomAPIView(GenericAPIView, ViewSet):
                 continue
 
             expected_types = tuple(MONGO_FIELD_TYPE_MAP.get(field, []))
-            print(data[name])
-            print(expected_types)
-            print(name)
-            print(field)
-            print('\n\n')
             if not isinstance(data[name], expected_types):
                 response[name] = f'you send <{name}> in incorrect format (acceptable format: {field})'
                 response_status = False

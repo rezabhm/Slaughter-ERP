@@ -1,5 +1,5 @@
 from apps.orders.documents import PurchaseOrder, Invoice, Payment, BankAccount
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class PurchaseOrderSerializer(CustomSerializer):

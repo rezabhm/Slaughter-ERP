@@ -1,14 +1,12 @@
 from django.utils.decorators import method_decorator
-from rest_framework import status
-from django.http import JsonResponse
 
 from api.v1.order.purchase_order.conf import *
 from api.v1.order.purchase_order.swagger import *
 from api.v1.order.purchase_order.utils import handle_status_action
 from apps.orders.documents import PurchaseOrder
 from apps.orders.serializers import PurchaseOrderSerializer, PurchaseOrderSerializerPOST
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
 @method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=PurchaseOrderSerializerPOST, method='bulk_post', many=True))

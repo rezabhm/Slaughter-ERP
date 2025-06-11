@@ -4,8 +4,8 @@ from api.v1.buy.production_order.swagger import VerifiedActionSwagger, ReceivedA
 from api.v1.buy.production_order.utils import handle_status
 from apps.buy.documents import ProductionOrder
 from apps.buy.serializer import ProductionOrderSerializer, ProductionOrderSerializerPOST
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
 @method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=ProductionOrderSerializerPOST, method='bulk_post', many=True))
@@ -40,6 +40,27 @@ class ProductionOrderAPIView(CustomAPIView):
         'PATCH': ['admin'],
         'DELETE': ['admin'],
     }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.model = ProductionOrder
+        self.lookup_field = 'id'
+        self.ordering_fields = '-create__date'
+
+        self.serializer_class = {
+            'GET': ProductionOrderSerializer,
+            'POST': ProductionOrderSerializerPOST,
+            'PATCH': ProductionOrderSerializer,
+            'PERFORM_ACTION': {}
+        }
+
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+        }
 
     def get_queryset(self):
         return ProductionOrder.objects()

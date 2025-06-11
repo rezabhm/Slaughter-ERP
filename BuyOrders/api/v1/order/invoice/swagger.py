@@ -1,5 +1,5 @@
 from apps.orders.documents import Invoice
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class AddPurchaseOrdersSwaggerSerializer(CustomSerializer):
