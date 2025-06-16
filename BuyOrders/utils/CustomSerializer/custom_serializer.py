@@ -1,9 +1,13 @@
 import mongoengine
 from typing import Any, Dict, List, Optional, Union, Type
 
+import requests
+from django.conf import settings
+
 from utils.CustomSerializer.data_serializer import DataSerializer
 from utils.CustomSerializer.field_value_parser import FieldValueProcessor
 from utils.CustomSerializer.meta_config import MetaConfig
+from utils.microservice.auth import load_slaughter_erp_token
 
 
 class CustomSerializer:
@@ -80,6 +84,49 @@ class CustomSerializer:
         if not self.many and self.data:
             self.data = self.data[0]
 
-    @staticmethod
-    def to_represent(validated_data):
+    def to_represent(self, validated_data):
+        validated_data = self._get_date_from_other_service(validated_data)
         return validated_data
+
+    def _get_date_from_other_service(self, validated_date):
+        for key, item in validated_date.items():
+
+            if isinstance(item, dict):
+                new_item = self._get_date_from_other_service(item)
+            else:
+                new_item = self._get_single_data_from_other_service(key, item)
+
+            validated_date[key] = new_item
+
+        return validated_date
+
+    def _get_single_data_from_other_service(self, key, value):
+
+        microservice_url = settings.MICROSERVICE_URL
+
+        if key in microservice_url.keys():
+
+            res = self._get_data(f'{microservice_url[key]}{value}/')
+
+            if res:
+                return res
+            else:
+                return {'message': f"we can't get data from [{microservice_url[key]}{key}/]"}
+
+        return value
+
+    @staticmethod
+    def _get_data(url):
+
+        token = load_slaughter_erp_token()
+
+        if token:
+            res = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+
+            if res.status_code in range(199, 299):
+                return res.json()
+            else:
+                return None
+
+        else:
+            return {'message': f'invalid token for get data from [{url}]'}

@@ -16,23 +16,27 @@ from utils.swagger_utils.custom_swagger_generator import custom_swagger_generato
 @method_decorator(name='single_delete_request', decorator=custom_swagger_generator(serializer_class=BankAccountSerializer, method='single_delete', many=False))
 class BankAccountAPIView(CustomAPIView):
 
-    model = BankAccount
-    lookup_field = 'id'
-    ordering_fields = ['account_number']
+    def __init__(self, *args, **kwargs):
 
-    serializer_class = {
-        'GET': BankAccountSerializer,
-        'POST': BankAccountSerializerPOST,
-        'PATCH': BankAccountSerializer,
-        'PERFORM_ACTION': {}
-    }
+        super().__init__(*args, **kwargs)
 
-    allowed_roles = {
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
-    }
+        self.model = BankAccount
+        self.lookup_field = 'id'
+        self.ordering_fields = ['account_number']
+
+        self.serializer_class = {
+            'GET': BankAccountSerializer,
+            'POST': BankAccountSerializerPOST,
+            'PATCH': BankAccountSerializer,
+            'PERFORM_ACTION': {}
+        }
+
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+        }
 
     def get_queryset(self):
         return BankAccount.objects()

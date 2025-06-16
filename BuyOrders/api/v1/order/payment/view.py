@@ -16,23 +16,25 @@ from utils.swagger_utils.custom_swagger_generator import custom_swagger_generato
 @method_decorator(name='single_delete_request', decorator=custom_swagger_generator(serializer_class=PaymentSerializer, method='single_delete', many=False))
 class PaymentAPIView(CustomAPIView):
 
-    model = Payment
-    lookup_field = 'id'
-    ordering_fields = ['created_at__date']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.model = Payment
+        self.lookup_field = 'id'
+        self.ordering_fields = ['created_at__date']
 
-    serializer_class = {
-        'GET': PaymentSerializer,
-        'POST': PaymentSerializerPOST,
-        'PATCH': PaymentSerializer,
-        'PERFORM_ACTION': {}
-    }
+        self.serializer_class = {
+            'GET': PaymentSerializer,
+            'POST': PaymentSerializerPOST,
+            'PATCH': PaymentSerializer,
+            'PERFORM_ACTION': {}
+        }
 
-    allowed_roles = {
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
-    }
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+        }
 
     def get_queryset(self):
         return Payment.objects()

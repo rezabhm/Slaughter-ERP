@@ -7,7 +7,7 @@ from rest_framework import mixins, filters
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.product.models import Unit
-from apps.product.serializers import UnitSerializers  # Ensure you have this
+from apps.product.serializers import UnitSerializer  # Ensure you have this
 from utils.rest_framework_class import BaseAPIView
 
 
@@ -16,7 +16,7 @@ from utils.rest_framework_class import BaseAPIView
     operation_description='Only admins can create new units. This operation allows the creation'
                           ' of a new unit with the specified name and slug.',
     tags=['admin.product.unit'],
-    request_body=UnitSerializers,
+    request_body=UnitSerializer,
 ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(
     operation_summary='Retrieve a unit by slug',
@@ -35,7 +35,7 @@ from utils.rest_framework_class import BaseAPIView
     manual_parameters=[
         openapi.Parameter('slug', openapi.IN_PATH, description="Slug of the unit.", type=openapi.TYPE_STRING)
     ],
-    request_body=UnitSerializers,
+    request_body=UnitSerializer,
 ))
 @method_decorator(name='partial_update', decorator=swagger_auto_schema(
     operation_summary='Update unit (partial)',
@@ -45,7 +45,7 @@ from utils.rest_framework_class import BaseAPIView
     manual_parameters=[
         openapi.Parameter('slug', openapi.IN_PATH, description="Slug of the unit.", type=openapi.TYPE_STRING)
     ],
-    request_body=UnitSerializers,
+    request_body=UnitSerializer,
 ))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(
     operation_summary='Delete a unit',
@@ -66,7 +66,7 @@ from utils.rest_framework_class import BaseAPIView
         openapi.Parameter('search', openapi.IN_QUERY, description="Search units by name or slug.",
                           type=openapi.TYPE_STRING)
     ],
-    responses={200: UnitSerializers(many=True)}
+    responses={200: UnitSerializer(many=True)}
 ))
 class UnitAdminAPIView(
     BaseAPIView,
@@ -79,7 +79,7 @@ class UnitAdminAPIView(
 ):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
-    serializer_class = UnitSerializers
+    serializer_class = UnitSerializer
     lookup_field = 'slug'
     queryset = Unit.objects.all()
 
@@ -91,7 +91,7 @@ class UnitAdminAPIView(
     operation_summary='Create a unit (public)',
     operation_description='Allow public users to create a unit. Requires unit data to create a new unit.',
     tags=['product.unit'],
-    request_body=UnitSerializers,
+    request_body=UnitSerializer,
 ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(
     operation_summary='Retrieve a unit by slug (public)',
@@ -110,7 +110,7 @@ class UnitAdminAPIView(
         openapi.Parameter('search', openapi.IN_QUERY, description="Search units by name or slug.",
                           type=openapi.TYPE_STRING)
     ],
-    responses={200: UnitSerializers(many=True)}
+    responses={200: UnitSerializer(many=True)}
 ))
 class UnitAPIView(
     BaseAPIView,
@@ -121,7 +121,7 @@ class UnitAPIView(
 ):
     authentication_classes = [JWTAuthentication]
     permission_classes = [AllowAny]
-    serializer_class = UnitSerializers
+    serializer_class = UnitSerializer
     lookup_field = 'slug'
     queryset = Unit.objects.all()
 

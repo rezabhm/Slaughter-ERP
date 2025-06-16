@@ -5,7 +5,7 @@ from apps.accounts.serializers import ContactSerializers
 from apps.core.models.ownership import *
 from apps.core.models.transportation import Driver, Car
 from apps.product.models import ProductCategory
-from apps.product.serializers import ProductCategorySerializers
+from apps.product.serializers import ProductCategorySerializer
 
 
 class CitySerializers(serializers.ModelSerializer):
@@ -117,7 +117,7 @@ class CarSerializers(serializers.ModelSerializer):
         try:
 
             product_category = ProductCategory.objects.get(pk=representation['product_category'])
-            product_category_serializers = ProductCategorySerializers(data=[product_category], many=True)
+            product_category_serializers = ProductCategorySerializer(data=[product_category], many=True)
             product_category_serializers.is_valid()
             product_category = product_category_serializers.data[0]
 

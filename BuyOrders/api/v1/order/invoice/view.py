@@ -26,23 +26,26 @@ from utils.swagger_utils.custom_swagger_generator import custom_swagger_generato
 ))
 class InvoiceAPIView(CustomAPIView):
 
-    model = Invoice
-    lookup_field = 'id'
-    ordering_fields = '-created_at__date'
+    def __int__(self, *args, **kwargs):
+        super().__int__(*args, **kwargs)
 
-    serializer_class = {
-        'GET': InvoiceSerializer,
-        'POST': InvoiceSerializerPOST,
-        'PATCH': InvoiceSerializer,
-        'PERFORM_ACTION': {}
-    }
+        self.model = Invoice
+        self.lookup_field = 'id'
+        self.ordering_fields = '-created_at__date'
 
-    allowed_roles = {
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
-    }
+        self.serializer_class = {
+            'GET': InvoiceSerializer,
+            'POST': InvoiceSerializerPOST,
+            'PATCH': InvoiceSerializer,
+            'PERFORM_ACTION': {}
+        }
+
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+        }
 
     def get_queryset(self):
         return Invoice.objects()

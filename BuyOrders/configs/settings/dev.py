@@ -69,3 +69,27 @@ MONGODB_SETTINGS = {
     "db": "SlaughterERP_BuyOrders",
     "host": "mongodb://localhost:27017/SlaughterERP_BuyOrders",
 }
+
+# microservice data
+MICROSERVICE_URL = {
+
+    'test_token': 'http://127.0.0.1:8000/api/v1/admin/accounts/role/',
+    'login': 'http://127.0.0.1:8000/api/v1/auth/login',
+
+    'product': 'http://127.0.0.1:8000/api/v1/admin/product/product/',
+    'product_owner': 'http://127.0.0.1:8000/api/v1/admin/ownership/product-owner/',
+    'car': 'http://127.0.0.1:8000/api/v1/admin/transportation/car/',
+    'driver': 'http://127.0.0.1:8000/api/v1/admin/transportation/driver/',
+    'agriculture': 'http://127.0.0.1:8000/api/v1/admin/ownership/agriculture/',
+    'city': 'http://127.0.0.1:8000/api/v1/admin/ownership/city/',
+
+}
+
+MICROSERVICE_CONFIGS = {
+
+    'SlaughterERP': {
+        'username': 'service_buy_orders',
+        'password': '12345'
+    }
+
+}

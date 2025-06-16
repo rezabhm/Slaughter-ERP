@@ -1,0 +1,10 @@
+
+
+# optimize utils code
+# microservice connection
+# permissions
+# http only cookie
+
+# optimize code
+# test
+# technology

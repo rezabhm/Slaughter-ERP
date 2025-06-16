@@ -61,23 +61,26 @@ from utils.swagger_utils.custom_swagger_generator import custom_swagger_generato
 ))
 class PurchaseOrderAPIView(CustomAPIView):
 
-    model = PurchaseOrder
-    lookup_field = 'id'
-    ordering_fields = '-created_at__date'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    serializer_class = {
-        'GET': PurchaseOrderSerializer,
-        'POST': PurchaseOrderSerializerPOST,
-        'PATCH': PurchaseOrderSerializer,
-        'PERFORM_ACTION': {}
-    }
+        self.model = PurchaseOrder
+        self.lookup_field = 'id'
+        self.ordering_fields = '-created_at__date'
 
-    allowed_roles = {
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
-    }
+        self.serializer_class = {
+            'GET': PurchaseOrderSerializer,
+            'POST': PurchaseOrderSerializerPOST,
+            'PATCH': PurchaseOrderSerializer,
+            'PERFORM_ACTION': {}
+        }
+
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+        }
 
     def get_queryset(self):
         return PurchaseOrder.objects()

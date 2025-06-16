@@ -13,7 +13,7 @@ class Driver(models.Model):
     slug = models.SlugField(unique=True)
 
     def __str__(self):
-        return self.contact.name
+        return self.slug
 
     def save(
         self,

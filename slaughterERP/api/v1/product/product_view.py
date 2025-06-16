@@ -7,7 +7,7 @@ from rest_framework import mixins, filters
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.product.models import Product
-from apps.product.serializers import ProductSerializers  # Ensure you have this
+from apps.product.serializers import ProductSerializer  # Ensure you have this
 from utils.rest_framework_class import BaseAPIView
 
 
@@ -17,7 +17,7 @@ from utils.rest_framework_class import BaseAPIView
     operation_description='Only admins can create new products. This operation allows admins to create'
                           ' products with specific name, code, category, and unit information.',
     tags=['admin.product.product'],
-    request_body=ProductSerializers,
+    request_body=ProductSerializer,
 ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(
     operation_summary='Retrieve a product by slug',
@@ -35,7 +35,7 @@ from utils.rest_framework_class import BaseAPIView
     manual_parameters=[
         openapi.Parameter('slug', openapi.IN_PATH, description="Slug of the product.", type=openapi.TYPE_STRING)
     ],
-    request_body=ProductSerializers,
+    request_body=ProductSerializer,
 ))
 @method_decorator(name='partial_update', decorator=swagger_auto_schema(
     operation_summary='Update product (partial)',
@@ -45,7 +45,7 @@ from utils.rest_framework_class import BaseAPIView
     manual_parameters=[
         openapi.Parameter('slug', openapi.IN_PATH, description="Slug of the product.", type=openapi.TYPE_STRING)
     ],
-    request_body=ProductSerializers,
+    request_body=ProductSerializer,
 ))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(
     operation_summary='Delete a product',
@@ -67,7 +67,7 @@ from utils.rest_framework_class import BaseAPIView
                                                                   "code, category, or unit.",
                           type=openapi.TYPE_STRING)
     ],
-    responses={200: ProductSerializers(many=True)}
+    responses={200: ProductSerializer(many=True)}
 ))
 class ProductAdminAPIView(
     BaseAPIView,
@@ -80,7 +80,7 @@ class ProductAdminAPIView(
 ):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
-    serializer_class = ProductSerializers
+    serializer_class = ProductSerializer
     lookup_field = 'slug'
     queryset = Product.objects.all()
 
@@ -106,7 +106,7 @@ class ProductAdminAPIView(
                                                                   "by name, code, category, or unit.",
                           type=openapi.TYPE_STRING)
     ],
-    responses={200: ProductSerializers(many=True)}
+    responses={200: ProductSerializer(many=True)}
 ))
 class ProductAPIView(
     BaseAPIView,
@@ -116,7 +116,7 @@ class ProductAPIView(
 ):
     authentication_classes = [JWTAuthentication]
     permission_classes = [AllowAny]
-    serializer_class = ProductSerializers
+    serializer_class = ProductSerializer
     lookup_field = 'slug'
     queryset = Product.objects.all()
 

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.accounts.models import *
-from apps.product.serializers import UnitSerializers
+from apps.product.serializers import UnitSerializer
 
 
 class CustomUserSerializers(serializers.ModelSerializer):
@@ -42,7 +42,7 @@ class RoleSerializers(serializers.ModelSerializer):
         for unit_id in representation['unit']:
 
             unit = Unit.objects.get(id=unit_id)
-            unit_serializer = UnitSerializers(data=[unit], many=True)
+            unit_serializer = UnitSerializer(data=[unit], many=True)
             unit_serializer.is_valid()
             unit_list.append(unit_serializer.data[0])
 
@@ -64,7 +64,7 @@ class ContactSerializers(serializers.ModelSerializer):
         for unit_id in representation['unit']:
 
             unit = Unit.objects.get(id=unit_id)
-            unit_serializer = UnitSerializers(data=[unit], many=True)
+            unit_serializer = UnitSerializer(data=[unit], many=True)
             unit_serializer.is_valid()
             unit_list.append(unit_serializer.data[0])
 

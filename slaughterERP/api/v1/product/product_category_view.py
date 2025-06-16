@@ -7,7 +7,7 @@ from rest_framework import mixins, filters
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.product.models import ProductCategory
-from apps.product.serializers import ProductCategorySerializers
+from apps.product.serializers import ProductCategorySerializer
 from utils.rest_framework_class import BaseAPIView
 
 
@@ -17,7 +17,7 @@ from utils.rest_framework_class import BaseAPIView
     operation_description='Only admins can create new product categories. This operation '
                           'allows the creation of a new product category with the specified name and slug.',
     tags=['admin.product.product_category'],
-    request_body=ProductCategorySerializers,
+    request_body=ProductCategorySerializer,
 ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(
     operation_summary='Retrieve a product category by slug',
@@ -38,7 +38,7 @@ from utils.rest_framework_class import BaseAPIView
         openapi.Parameter('slug', openapi.IN_PATH, description="Slug of the product category.",
                           type=openapi.TYPE_STRING)
     ],
-    request_body=ProductCategorySerializers,
+    request_body=ProductCategorySerializer,
 ))
 @method_decorator(name='partial_update', decorator=swagger_auto_schema(
     operation_summary='Update product category (partial)',
@@ -49,7 +49,7 @@ from utils.rest_framework_class import BaseAPIView
         openapi.Parameter('slug', openapi.IN_PATH, description="Slug of the product category.",
                           type=openapi.TYPE_STRING)
     ],
-    request_body=ProductCategorySerializers,
+    request_body=ProductCategorySerializer,
 ))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(
     operation_summary='Delete a product category',
@@ -71,7 +71,7 @@ from utils.rest_framework_class import BaseAPIView
         openapi.Parameter('search', openapi.IN_QUERY, description="Search product categories by name or slug.",
                           type=openapi.TYPE_STRING)
     ],
-    responses={200: ProductCategorySerializers(many=True)}
+    responses={200: ProductCategorySerializer(many=True)}
 ))
 class ProductCategoryAdminAPIView(
     BaseAPIView,
@@ -84,7 +84,7 @@ class ProductCategoryAdminAPIView(
 ):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
-    serializer_class = ProductCategorySerializers
+    serializer_class = ProductCategorySerializer
     lookup_field = 'slug'
     queryset = ProductCategory.objects.all()
 
@@ -110,7 +110,7 @@ class ProductCategoryAdminAPIView(
         openapi.Parameter('search', openapi.IN_QUERY, description="Search product categories by name or slug.",
                           type=openapi.TYPE_STRING)
     ],
-    responses={200: ProductCategorySerializers(many=True)}
+    responses={200: ProductCategorySerializer(many=True)}
 ))
 class ProductCategoryAPIView(
     BaseAPIView,
@@ -120,7 +120,7 @@ class ProductCategoryAPIView(
 ):
     authentication_classes = [JWTAuthentication]
     permission_classes = [AllowAny]
-    serializer_class = ProductCategorySerializers
+    serializer_class = ProductCategorySerializer
     lookup_field = 'slug'
     queryset = ProductCategory.objects.all()
 
