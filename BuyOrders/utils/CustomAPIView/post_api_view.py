@@ -30,6 +30,7 @@ class PostMongoAPIView:
 
         model_serializer = serializer(request_data, many=True)
         model_serializer.create(request)
+        self.update_cache()
 
         return JsonResponse(data={'data': model_serializer.data}, status=status.HTTP_200_OK)
 
@@ -55,6 +56,7 @@ class PostMongoAPIView:
 
         model_serializer = serializer(request_data, many=False)
         model_serializer.create(request)
+        self.update_cache()
 
         return JsonResponse(data=model_serializer.data, status=status.HTTP_200_OK)
 

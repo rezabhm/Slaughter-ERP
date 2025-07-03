@@ -26,6 +26,7 @@ class DeleteMongoAPIView:
             )
 
         obj.delete()
+        self.update_cache()
         return JsonResponse(data={'data': 'Object deleted successfully'}, status=status.HTTP_200_OK)
 
     def bulk_delete_request(self, request):
@@ -57,5 +58,7 @@ class DeleteMongoAPIView:
             else:
                 obj.delete()
                 response[id_] = {'message': 'Object deleted successfully', 'status': status.HTTP_200_OK}
+
+        self.update_cache()
         return JsonResponse(data={'data': response}, status=status.HTTP_200_OK)
 

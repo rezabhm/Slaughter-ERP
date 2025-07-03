@@ -1,5 +1,6 @@
 import inspect
 
+from django.core.cache import cache
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
@@ -70,9 +71,28 @@ class BaseMongoAPIView(GenericAPIView, ViewSet):
         queryset = self.model.objects
         filter_status, filters_param = self.apply_filters()
         ordering_field = getattr(self, 'ordering_fields', 'id')
-        if filter_status:
-            return True, queryset.filter(**filters_param).order_by(ordering_field)
+        cache_data = cache.get(f'{self.model.__name__}:{str(filters_param)}')
+
+        if cache_data:
+            return True, cache_data
+
+        elif filter_status:
+            query_data = queryset.filter(**filters_param).order_by(ordering_field)
+
+            cache.set(f'{self.model.__name__}:{str(filters_param)}', query_data, timeout=60*5)
+            return True, query_data
         return False, filters_param
+
+    def update_cache(self):
+        """update cache after PATCH,POST,DELETE requests"""
+        queryset = self.model.objects
+        filter_status, filters_param = self.apply_filters()
+        cache_data = cache.get(f'{self.model.__name__}:{str(filters_param)}')
+        ordering_field = getattr(self, 'ordering_fields', 'id')
+
+        if cache_data and filter_status:
+            query_data = queryset.filter(**filters_param).order_by(ordering_field)
+            cache.set(f'{self.model.__name__}:{str(filters_param)}', query_data, timeout=60*5)
 
     def apply_filters(self):
         """Validate and extract filter query parameters."""

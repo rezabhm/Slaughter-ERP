@@ -33,6 +33,7 @@ class PatchMongoAPIView:
 
         validated_data = request.data
         model_serializer.update([validated_data])
+        self.update_cache()
 
         return JsonResponse(data=model_serializer.data,
                             status=status.HTTP_200_OK)
@@ -59,6 +60,7 @@ class PatchMongoAPIView:
 
         model_serializer = serializer(object_list, many=True)
         model_serializer.update(valid_data_list)
+        self.update_cache()
 
         return JsonResponse(data={'data': model_serializer.data},
                             status=status.HTTP_200_OK)
