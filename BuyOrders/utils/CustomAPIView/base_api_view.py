@@ -22,6 +22,33 @@ class BaseMongoAPIView(GenericAPIView, ViewSet):
         'ReferenceField': [dict, str],
     }
 
+    mongo_filter = {
+        'IntField': ['exact', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'mod', 'exists'],
+        'LongField': ['exact', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists'],
+        'FloatField': ['exact', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists'],
+        'DecimalField': ['exact', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists'],
+        'BooleanField': ['exact', 'ne', 'exists'],
+        'StringField': ['exact', 'iexact', 'contains', 'icontains', 'startswith', 'istartswith', 'endswith',
+                        'iendswith', 'ne', 'in', 'nin', 'exists', 'regex', 'iregex'],
+        'EmailField': ['exact', 'iexact', 'contains', 'icontains', 'ne', 'in', 'nin', 'exists'],
+        'URLField': ['exact', 'contains', 'icontains', 'ne', 'in', 'nin', 'exists'],
+        'DateTimeField': ['exact', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists'],
+        'DateField': ['exact', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists'],
+        'TimeField': ['exact', 'lt', 'lte', 'gt', 'gte', 'ne', 'exists'],
+        'UUIDField': ['exact', 'ne', 'in', 'nin', 'exists'],
+        'ObjectIdField': ['exact', 'ne', 'in', 'nin', 'exists'],
+        'ReferenceField': ['exact', 'ne', 'in', 'nin', 'exists'],
+        'ListField': ['all', 'size', 'in', 'nin', 'exists'],
+        'EmbeddedDocumentField': ['exact', 'exists'],
+        'DictField': ['exact', 'exists'],
+        'GeoPointField': ['geo_within_box', 'geo_within_polygon', 'geo_within_center', 'near', 'near_sphere',
+                          'exists'],
+        'FileField': ['exists'],
+        'ImageField': ['exists'],
+        'BinaryField': ['exists'],
+        'SequenceField': ['exact', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists'],
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model = None  # MongoEngine document class
@@ -35,7 +62,7 @@ class BaseMongoAPIView(GenericAPIView, ViewSet):
             return JsonResponse(data=query_set, status=status.HTTP_400_BAD_REQUEST)
         try:
             return query_set.filter(**query).first()
-        except Exception:
+        except Exception as e:
             return None
 
     def get_queryset_with_filters(self):
@@ -62,15 +89,10 @@ class BaseMongoAPIView(GenericAPIView, ViewSet):
 
     def generate_filters_param(self, fields, base_name=''):
         """Generate valid filter query parameters for MongoDB fields."""
-        mongo_filter = {
-            'IntField': ['exact', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'mod', 'exists'],
-            'StringField': ['exact', 'iexact', 'contains', 'icontains', 'startswith', 'istartswith', 'endswith',
-                            'iendswith', 'ne', 'in', 'nin', 'exists', 'regex', 'iregex'],
-            # Add other field types as needed
-        }
+
         filters_param = []
         for name, value in fields.items():
-            for filter_type in mongo_filter.get(value['type'], []):
+            for filter_type in self.mongo_filter.get(value['type'], []):
                 if name != 'id':
                     filters_param.append(f'{base_name}{name}__{filter_type}')
             if value['type'] in ['EmbeddedDocumentField', 'ReferenceField']:
@@ -124,12 +146,12 @@ class BaseMongoAPIView(GenericAPIView, ViewSet):
         return response if response else None
 
     def get_action_fun_list(self):
-
-        methods = [name for name, member in inspect.getmembers(self.__class__)
+        """Return list an of action list in final APIView class."""
+        function_list = [name for name, member in inspect.getmembers(self.__class__)
                    if inspect.isfunction(member) and not name.startswith("__")]
 
         action_function_list = {}
-        for name in methods:
+        for name in function_list:
             if name.startswith('action'):
 
                 action = getattr(self, name, None)

@@ -11,9 +11,8 @@ class PostMongoAPIView:
 
         request_data = request.data.get('data', None)
         if not request_data:
-            return JsonResponse(data={'message': 'you must send data parameter'} , status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(data={'message': 'you must send data parameter'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # single create
         serializer_class = getattr(self, 'serializer_class', None)
         if not serializer_class:
             return JsonResponse(data={'message': 'serializer class didnt set'},
@@ -37,7 +36,6 @@ class PostMongoAPIView:
     def single_post_request(self, request, *args, **kwargs):
 
         request_data = request.data
-        print(request_data)
 
         # single create
         serializer_class = getattr(self, 'serializer_class', None)
@@ -58,7 +56,7 @@ class PostMongoAPIView:
         model_serializer = serializer(request_data, many=False)
         model_serializer.create(request)
 
-        return JsonResponse(data={'data': model_serializer.data}, status=status.HTTP_200_OK)
+        return JsonResponse(data=model_serializer.data, status=status.HTTP_200_OK)
 
     def check_post_data(self, data, many=False):
         MONGO_FIELD_TYPE_MAP = {

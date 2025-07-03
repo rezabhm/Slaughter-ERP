@@ -20,7 +20,7 @@ class PaymentAPIView(CustomAPIView):
         super().__init__(*args, **kwargs)
         self.model = Payment
         self.lookup_field = 'id'
-        self.ordering_fields = ['created_at__date']
+        self.ordering_fields = 'created_at__date'
 
         self.serializer_class = {
             'GET': PaymentSerializer,

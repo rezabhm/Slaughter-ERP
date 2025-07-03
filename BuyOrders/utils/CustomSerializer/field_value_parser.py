@@ -9,20 +9,27 @@ class FieldValueProcessor:
     @staticmethod
     def get_field_value(obj: Any, name: str, field: Any) -> Any:
         """Extracts and processes field value from an object."""
-        value = getattr(obj, name, None)
-        if value and field.__class__.__name__ in ['EmbeddedDocumentField', 'ReferenceField']:
-            return value.to_mongo().to_dict()
-        return value
+        try:
+            value = getattr(obj, name, None)
+            if value and field.__class__.__name__ in ['EmbeddedDocumentField', 'ReferenceField']:
+                return value.to_mongo().to_dict()
+            return value
+        except:
+            print(f'obj : {obj} ----  name : {name}')
 
     @staticmethod
     def process_related_field(field: Any, value: Any, related_class: Type[mongoengine.Document]) -> Optional[Any]:
         """Processes related fields (EmbeddedDocumentField or ReferenceField)."""
         if isinstance(value, dict):
-            related_instance = related_class.objects(**value).first()
-            if not related_instance:
-                related_instance = related_class(**value)
-                if field.__class__.__name__ == 'ReferenceField':
+
+            if field.__class__.__name__ == 'ReferenceField':
+                related_instance = related_class.objects(**value).first()
+                if not related_instance:
+                    related_instance = related_class(**value)
                     related_instance.save()
+            else:
+                related_instance = related_class(**value)
+
             return related_instance
         elif isinstance(value, (str, ObjectId)):
             try:

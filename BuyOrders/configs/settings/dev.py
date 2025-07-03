@@ -73,15 +73,15 @@ MONGODB_SETTINGS = {
 # microservice data
 MICROSERVICE_URL = {
 
-    'test_token': 'http://127.0.0.1:8000/api/v1/admin/accounts/role/',
-    'login': 'http://127.0.0.1:8000/api/v1/auth/login',
-
-    'product': 'http://127.0.0.1:8000/api/v1/admin/product/product/',
-    'product_owner': 'http://127.0.0.1:8000/api/v1/admin/ownership/product-owner/',
-    'car': 'http://127.0.0.1:8000/api/v1/admin/transportation/car/',
-    'driver': 'http://127.0.0.1:8000/api/v1/admin/transportation/driver/',
-    'agriculture': 'http://127.0.0.1:8000/api/v1/admin/ownership/agriculture/',
-    'city': 'http://127.0.0.1:8000/api/v1/admin/ownership/city/',
+    # 'test_token': 'http://127.0.0.1:8000/api/v1/admin/accounts/role/',
+    # 'login': 'http://127.0.0.1:8000/api/v1/auth/login',
+    #
+    # 'product': 'http://127.0.0.1:8000/api/v1/admin/product/product/',
+    # 'product_owner': 'http://127.0.0.1:8000/api/v1/admin/ownership/product-owner/',
+    # 'car': 'http://127.0.0.1:8000/api/v1/admin/transportation/car/',
+    # 'driver': 'http://127.0.0.1:8000/api/v1/admin/transportation/driver/',
+    # 'agriculture': 'http://127.0.0.1:8000/api/v1/admin/ownership/agriculture/',
+    # 'city': 'http://127.0.0.1:8000/api/v1/admin/ownership/city/',
 
 }
 

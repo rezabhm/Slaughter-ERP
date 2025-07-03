@@ -19,11 +19,11 @@ class CustomJWTAuthentication(JWTAuthentication):
 
         # Fallback to Authorization header if cookie is not present
         if not token:
-            return None
-            # auth_header = request.headers.get("Authorization")
-            # if not auth_header or not auth_header.startswith("Bearer "):
-            #     return None
-            # token = auth_header.split(" ")[1]
+            auth_header = request.headers.get("Authorization")
+            if not auth_header or not auth_header.startswith("Bearer "):
+                return None
+            token = auth_header.split(" ")[1]
+            # return None
 
         try:
             with open('configs/settings/jwt/public_key.pem', 'rb') as public_key_file:

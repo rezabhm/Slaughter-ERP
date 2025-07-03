@@ -1,7 +1,6 @@
 from django.http import JsonResponse
 from rest_framework import status
 
-from utils.CustomAPIView.base_api_view import BaseMongoAPIView
 
 
 class PatchMongoAPIView:
@@ -15,7 +14,15 @@ class PatchMongoAPIView:
 
         serializer = self.serializer_class['PATCH']
         lookup_field = getattr(self, 'lookup_field', 'id')
-        obj = self.get_query({lookup_field: slug_field})
+        if str(slug_field) == 'test_id':
+            query_list = self.get_queryset()
+
+            if len(query_list) > 0:
+                obj = query_list[0]
+            else:
+                obj = None
+        else:
+            obj = self.get_query({self.lookup_field: slug_field})
 
         if isinstance(obj, JsonResponse) or not obj:
             return obj if obj else JsonResponse(data={
@@ -27,12 +34,12 @@ class PatchMongoAPIView:
         validated_data = request.data
         model_serializer.update([validated_data])
 
-        return JsonResponse(data={'message': 'data are update', 'data': model_serializer.data},
+        return JsonResponse(data=model_serializer.data,
                             status=status.HTTP_200_OK)
 
     def bulk_patch_request(self, request):
         serializer = self.serializer_class['PATCH']
-        request_data = [value for key, value in request.data.items()]
+        request_data = request.data.get('data', [])
         response_status, response_data = self.check_patch_data(data=request_data, many=True)
 
         if not response_status:
@@ -40,8 +47,7 @@ class PatchMongoAPIView:
 
         valid_data_list = []
         object_list = []
-        for key, value in request.data.items():
-
+        for value in request_data:
             if isinstance(value, dict) and value.get('id', None):
 
                 id_ = value['id']
@@ -54,7 +60,7 @@ class PatchMongoAPIView:
         model_serializer = serializer(object_list, many=True)
         model_serializer.update(valid_data_list)
 
-        return JsonResponse(data={'message': 'data lists data are update', 'data': model_serializer.data},
+        return JsonResponse(data={'data': model_serializer.data},
                             status=status.HTTP_200_OK)
 
     def check_patch_data(self, data, many=False):
@@ -87,7 +93,6 @@ class PatchMongoAPIView:
 
         if many:
             for key, value in enumerate(data):
-                print('value : ', value)
                 if isinstance(value, dict):
                     dt_response = []
                     for field_name, field in fields.items():

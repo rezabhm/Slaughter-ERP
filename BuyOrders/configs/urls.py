@@ -41,6 +41,7 @@ urlpatterns = [
     # documentation
     path('api-docs/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api-docs/re-doc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('api-docs/swagger.json', schema_view.without_ui(cache_timeout=0, ), name='schema-json'),
 
     # API version 1
     path('api/v1/', include('api.v1.routers'))

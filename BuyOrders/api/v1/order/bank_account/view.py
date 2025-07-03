@@ -22,7 +22,7 @@ class BankAccountAPIView(CustomAPIView):
 
         self.model = BankAccount
         self.lookup_field = 'id'
-        self.ordering_fields = ['account_number']
+        self.ordering_fields = 'account_number'
 
         self.serializer_class = {
             'GET': BankAccountSerializer,

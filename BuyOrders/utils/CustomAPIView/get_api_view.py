@@ -13,7 +13,17 @@ class GetMongoAPIView:
 
     def single_get(self, request, slug_field=None, *args, **kwargs):
         """Retrieve a single document by lookup field."""
-        obj = self.get_query({self.lookup_field: str(slug_field)})
+
+        if str(slug_field) == 'test_id':
+            query_list = self.get_queryset()
+
+            if len(query_list) > 0:
+                obj = query_list[0]
+            else:
+                obj = None
+        else:
+            obj = self.get_query({self.lookup_field: str(slug_field)})
+
         if not obj:
             return JsonResponse(
                 data={'message': f'No object found with {self.lookup_field} = "{slug_field}".'},

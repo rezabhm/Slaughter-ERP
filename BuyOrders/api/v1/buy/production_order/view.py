@@ -20,7 +20,7 @@ from utils.swagger_utils.custom_swagger_generator import custom_swagger_generato
 @method_decorator(name='action_received', decorator=action_swagger_documentation(summaries='set received status', action_name='received', description='set production order to received or unreceived', serializer_class=ReceivedActionSwagger, res={'200': http_200, '404': http_404}))
 @method_decorator(name='action_finished', decorator=action_swagger_documentation(summaries='set finished status', action_name='finished', description='set production order to finished or unfinished', serializer_class=FinishedActionSwagger, res={'200': http_200, '404': http_404}))
 @method_decorator(name='action_done', decorator=action_swagger_documentation(summaries='set done status', action_name='done', description='set production order to done and update weight and quality', serializer_class=DoneActionSwagger, res={'200': http_200, '404': http_404}))
-@method_decorator(name='action_cancelled', decorator=action_swagger_documentation(summaries='set cancelled status', action_name='cancelled', description='set production order to cancelled', serializer_class=CancelledActionSwagger, res={'200': http_200, '404': http_404}))
+@method_decorator(name='action_cancelled', decorator=action_swagger_documentation(summaries='set cancelled status', action_name='cancelled', description='set production order to cancelled', serializer_class=CancelledActionSwagger, res={'200': http_200}))
 class ProductionOrderAPIView(CustomAPIView):
 
     model = ProductionOrder

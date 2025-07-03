@@ -19,7 +19,7 @@ class DataSerializer:
         return {
             name: FieldValueProcessor.get_field_value(obj, name, field)
             for name, field in model_fields
-            if fields == '__all__' or name in fields
+            if fields == '__all__' or name in fields or 'id' in name
         }
 
     def correct_value(self, value: Any) -> Any:

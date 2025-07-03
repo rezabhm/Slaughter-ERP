@@ -31,8 +31,8 @@ class BankAccount(mongo.Document):
 # Document for Seller
 class Seller(mongo.Document):
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('Seller'))
-    name = mongo.StringField(required=True)
-    bank_account = mongo.StringField(required=True)
+    name = mongo.StringField()
+    bank_account = mongo.StringField()
 
     meta = {'collection': 'seller'}
 
@@ -50,10 +50,12 @@ class ProductInformation(mongo.Document):
 # Document for PurchaseOrder
 class PurchaseOrder(mongo.Document):
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('PurchaseOrder'))
-    status = mongo.StringField(choices=purchased_status_dict, default='pending for approved by financial department')
+    status = mongo.StringField(default='pending for approved by financial department')
+    # status = mongo.StringField(choices=purchased_status_dict, default='pending for approved by financial department')
 
-    product = mongo.ReferenceField(ProductInformation, required=True)
-    required_deadline = mongo.DateTimeField()
+    product = mongo.ReferenceField(ProductInformation, required=False)
+    required_deadline = mongo.StringField()
+    # required_deadline = mongo.DateTimeField()
 
     estimated_price = mongo.IntField()
 
@@ -67,7 +69,8 @@ class PurchaseOrder(mongo.Document):
     done = mongo.EmbeddedDocumentField(CheckStatus, default=lambda: CheckStatus())
 
     final_price = mongo.IntField()
-    planned_purchase_date = mongo.DateTimeField()
+    # planned_purchase_date = mongo.DateTimeField()
+    planned_purchase_date = mongo.StringField()
 
     have_factor = mongo.BooleanField(default=False)
 
@@ -78,14 +81,15 @@ class PurchaseOrder(mongo.Document):
 class Invoice(mongo.Document):
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('Invoice'))
     created_at = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(user=req.user_payload['username']))
-    purchase_date = mongo.DateTimeField(required=True)
-    invoice_number = mongo.StringField(required=True)
-    title = mongo.StringField(required=True)
-    description = mongo.StringField(required=True, default="")
-    seller = mongo.ReferenceField(Seller, required=True)
-    is_paid = mongo.StringField(default=False)
+    # purchase_date = mongo.DateTimeField(required=True)
+    purchase_date = mongo.StringField()
+    invoice_number = mongo.StringField()
+    title = mongo.StringField()
+    description = mongo.StringField(default="")
+    seller = mongo.ReferenceField('Seller', required=False)
+    is_paid = mongo.BooleanField(default=False)
 
-    product_list = mongo.ListField(mongo.ReferenceField(PurchaseOrder))
+    product_list = mongo.ListField(mongo.ReferenceField(PurchaseOrder, required=False))
 
     meta = {'collection': 'invoice'}
 
@@ -96,13 +100,13 @@ class Payment(mongo.Document):
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('Payment'))
     created_at = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(user=req.user_payload['username']))
 
-    amount = mongo.IntField(required=True)
-    payment_type = mongo.StringField(required=True)
-    from_account = mongo.ReferenceField(BankAccount)
-    to_account = mongo.ReferenceField(BankAccount)
-    payment_description = mongo.StringField(required=True, default="")
+    amount = mongo.IntField()
+    payment_type = mongo.StringField()
+    from_account = mongo.ReferenceField(BankAccount, required=False)
+    to_account = mongo.ReferenceField(BankAccount, required=False)
+    payment_description = mongo.StringField(default="")
 
-    invoice = mongo.ReferenceField(Invoice, required=True)
+    invoice = mongo.ReferenceField(Invoice, required=False)
 
     meta = {'collection': 'payment'}
 

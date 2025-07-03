@@ -26,8 +26,8 @@ from utils.swagger_utils.custom_swagger_generator import custom_swagger_generato
 ))
 class InvoiceAPIView(CustomAPIView):
 
-    def __int__(self, *args, **kwargs):
-        super().__int__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.model = Invoice
         self.lookup_field = 'id'

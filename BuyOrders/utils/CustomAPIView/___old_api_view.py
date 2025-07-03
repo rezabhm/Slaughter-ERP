@@ -216,7 +216,6 @@ class CustomAPIView(GenericAPIView, ViewSet):
 
         if many:
             for key, value in enumerate(data):
-                print('value : ', value)
                 if isinstance(value, dict):
                     dt_response = []
                     for field_name, field in fields.items():
@@ -296,7 +295,6 @@ class CustomAPIView(GenericAPIView, ViewSet):
 
         if many:
             for key, value in enumerate(data):
-                print('value : ', value)
                 if isinstance(value, dict):
                     dt_response = []
                     for field_name, field in fields.items():
@@ -676,7 +674,6 @@ class CustomAPIView(GenericAPIView, ViewSet):
             return JsonResponse(data={'message': 'serializer class for post method didnt set'},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        print(request_data)
         response_status, response_data = self.check_post_data(data=request_data, many=True)
 
         if not response_status:
@@ -709,7 +706,6 @@ class CustomAPIView(GenericAPIView, ViewSet):
 
         model_serializer = serializer(request_data, many=False)
         model_serializer.create(request)
-        print(model_serializer.data)
 
         return JsonResponse(data={'data': model_serializer.data}, status=status.HTTP_200_OK)
 

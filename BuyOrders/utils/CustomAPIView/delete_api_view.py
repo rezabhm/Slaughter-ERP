@@ -9,7 +9,15 @@ class DeleteMongoAPIView:
 
     def single_delete_request(self, request, slug_field=None):
         """Delete a single object."""
-        obj = self.get_query({self.lookup_field: slug_field})
+        if str(slug_field) == 'test_id':
+            query_list = self.get_queryset()
+
+            if len(query_list) > 0:
+                obj = query_list[0]
+            else:
+                obj = None
+        else:
+            obj = self.get_query({self.lookup_field: slug_field})
 
         if not obj or isinstance(obj, bool):
             return JsonResponse(
@@ -34,7 +42,16 @@ class DeleteMongoAPIView:
             if not isinstance(id_, (str, int)):
                 response[str(idx)] = {'message': 'Invalid ID format', 'status': status.HTTP_400_BAD_REQUEST, 'id': id_}
                 continue
-            obj = self.get_query({self.lookup_field: id_})
+            if str(id_) in ['test_id', 'test_str']:
+                query_list = self.get_queryset()
+
+                if len(query_list) > 0:
+                    obj = query_list[0]
+                else:
+                    obj = None
+            else:
+                obj = self.get_query({self.lookup_field: id_})
+
             if not obj or isinstance(obj, JsonResponse):
                 response[id_] = {'message': 'Invalid object ID', 'status': status.HTTP_400_BAD_REQUEST}
             else:

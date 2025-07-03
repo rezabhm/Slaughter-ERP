@@ -30,6 +30,7 @@ class ProductionOrder(mongo.Document):
     weight = mongo.IntField()
     quality = mongo.StringField()
 
+    # status = mongo.StringField(default='pending for verified')
     status = mongo.StringField(choices=status_dict, default='pending for verified')
     create = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(user=req.user_payload['username']))
 
