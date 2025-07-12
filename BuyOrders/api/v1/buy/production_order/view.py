@@ -62,6 +62,9 @@ class ProductionOrderAPIView(CustomAPIView):
             'DELETE': ['admin'],
         }
 
+        self.elasticsearch_index_name = 'production_order'
+        self.elasticsearch_fields = ["car", "driver", "agriculture", "product", "product_owner"]
+
     def get_queryset(self):
         return ProductionOrder.objects()
 

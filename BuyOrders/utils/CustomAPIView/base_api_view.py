@@ -1,10 +1,17 @@
 import inspect
+import json
+import pprint
 
 from django.core.cache import cache
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
+from rest_framework.request import Request
 from rest_framework.viewsets import ViewSet
+from django.conf import settings
+
+from utils.celery_utils import store_logs_in_background
+from utils.microservice.auth import load_slaughter_erp_token
 
 
 class BaseMongoAPIView(GenericAPIView, ViewSet):
@@ -178,3 +185,68 @@ class BaseMongoAPIView(GenericAPIView, ViewSet):
                 action_function_list[name[7:]] = action
 
         return action_function_list
+
+    @staticmethod
+    def store_logs(requests: Request, response: JsonResponse, response_status_code: int=200):
+
+        """
+        send api information to save logs in logs server
+
+        Args:
+            requests: apis received Requests
+            response: requests response
+            response_status_code: response status code
+        """
+        if getattr(settings, 'STORE_LOGS', False):
+
+            try:
+                jwt_data = requests.user_payload
+            except:
+                jwt_data = {'user': 'unknown'}
+
+            try:
+                log_server_information = settings.LOG_SERVER
+
+                method = requests.method
+                full_url = requests.build_absolute_uri()
+                body = requests.data
+
+                log_data = {
+
+                    "status_code": response_status_code,
+                    "response": json.dumps(response),
+                    'token_payload': json.dumps(jwt_data),
+                    'url': full_url,
+                    'request_body': json.dumps(body),
+                    'method': method,
+                    'request_header': json.dumps(dict(requests.headers)),
+                    'request_session': json.dumps(dict(requests.session))
+
+                }
+                token = load_slaughter_erp_token()
+
+                store_logs_in_background.delay(logs_data=log_data, log_server_information=log_server_information,
+                                               token=token)
+            except Exception as e:
+                print(e)
+
+    def search_elasticsearch(self, query: str):
+        """
+        search in elasticsearch
+
+        Args:
+            query: query string from url params
+        """
+        es = settings.ELASTICSEARCH_CONNECTION
+
+        response = es.search(
+            index=getattr(self, 'elasticsearch_index_name', 'main'),
+            query={
+                "multi_match": {
+                    "query": query,
+                    "fields": getattr(self, 'elasticsearch_fields', [])
+                }
+            }
+        )
+
+        return self.model.objects(id__in=[res['_id'] for res in response['hits']['hits']])

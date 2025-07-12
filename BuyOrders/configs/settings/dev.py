@@ -1,6 +1,10 @@
 from datetime import timedelta
 
+from elasticsearch import Elasticsearch
+
 from configs.settings.base import *
+import warnings
+from urllib3.exceptions import InsecureRequestWarning
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
@@ -73,15 +77,15 @@ MONGODB_SETTINGS = {
 # microservice data
 MICROSERVICE_URL = {
 
-    # 'test_token': 'http://127.0.0.1:8000/api/v1/admin/accounts/role/',
-    # 'login': 'http://127.0.0.1:8000/api/v1/auth/login',
-    #
-    # 'product': 'http://127.0.0.1:8000/api/v1/admin/product/product/',
-    # 'product_owner': 'http://127.0.0.1:8000/api/v1/admin/ownership/product-owner/',
-    # 'car': 'http://127.0.0.1:8000/api/v1/admin/transportation/car/',
-    # 'driver': 'http://127.0.0.1:8000/api/v1/admin/transportation/driver/',
-    # 'agriculture': 'http://127.0.0.1:8000/api/v1/admin/ownership/agriculture/',
-    # 'city': 'http://127.0.0.1:8000/api/v1/admin/ownership/city/',
+    'test_token': 'http://127.0.0.1:8000/api/v1/admin/accounts/role/',
+    'login': 'http://127.0.0.1:8000/api/v1/auth/login',
+
+    'product': 'http://127.0.0.1:8000/api/v1/admin/product/product/',
+    'product_owner': 'http://127.0.0.1:8000/api/v1/admin/ownership/product-owner/',
+    'car': 'http://127.0.0.1:8000/api/v1/admin/transportation/car/',
+    'driver': 'http://127.0.0.1:8000/api/v1/admin/transportation/driver/',
+    'agriculture': 'http://127.0.0.1:8000/api/v1/admin/ownership/agriculture/',
+    'city': 'http://127.0.0.1:8000/api/v1/admin/ownership/city/',
 
 }
 
@@ -98,9 +102,32 @@ MICROSERVICE_CONFIGS = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",  # دیتابیس ۱ از ردیس
+        "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
 }
+
+# celery Settings
+CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_USE = False
+
+# Log Service
+LOG_SERVER = {
+
+    'endpoint_url': "http://127.0.0.1:8010/api/v1/logs/c/"
+
+}
+STORE_LOGS = False
+
+# ElasticSearch
+warnings.filterwarnings("ignore", category=InsecureRequestWarning)
+ELASTICSEARCH_CONNECTION = Elasticsearch(
+    ['https://localhost:9200'],
+    basic_auth=('elastic', 'PaJ*8-X9YaOD+YyGcBRk'),
+    verify_certs=False  # ⛔ غیرفعال کردن بررسی گواهی SSL
+)
+ELASTICSEARCH_STATUS = True
