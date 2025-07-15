@@ -95,7 +95,6 @@ MICROSERVICE_CONFIGS = {
         'username': 'service_buy_orders',
         'password': '12345'
     }
-
 }
 
 # Redis Configs

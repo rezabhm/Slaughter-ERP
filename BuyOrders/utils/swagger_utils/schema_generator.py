@@ -1,17 +1,23 @@
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type
 from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
-from bson import ObjectId
 import mongoengine
 
 from utils.swagger_utils.openapi_type_mapper import OpenAPITypeMapper
 
 
 class SchemaGenerator:
-    """Generates OpenAPI schemas from MongoEngine models."""
+    """
+    Generates OpenAPI schemas from MongoEngine models using serializer metadata.
+    """
 
     def __init__(self, serializer_class: Type, many: bool = True):
-        """Initializes the schema generator with a serializer class."""
+        """
+        Initializes the schema generator with a serializer class.
+
+        Args:
+            serializer_class: The serializer class containing model metadata.
+            many: Whether the schema should represent a list of items.
+        """
         self.serializer = serializer_class()
         self.model = self.serializer.Meta.model
         self.many = many
@@ -19,7 +25,12 @@ class SchemaGenerator:
         self.required_fields = self._get_required_fields()
 
     def _get_fields(self) -> Dict[str, openapi.Schema]:
-        """Extracts fields from the model based on serializer Meta configuration."""
+        """
+        Extracts fields from the model based on serializer Meta configuration.
+
+        Returns:
+            Dict[str, openapi.Schema]: Mapping of field names to OpenAPI schemas.
+        """
         fields = {}
         meta_fields = getattr(self.serializer.Meta, 'fields', '__all__')
 
@@ -32,14 +43,27 @@ class SchemaGenerator:
         return fields
 
     def _get_required_fields(self) -> List[str]:
-        """Identifies required fields from the model."""
+        """
+        Identifies required fields from the model.
+
+        Returns:
+            List[str]: Names of fields that are required.
+        """
         return [
             name for name, field in self.model._fields.items()
             if getattr(field, 'required', False) or getattr(field, 'primary_key', False)
         ]
 
     def _get_field_schema(self, field: Any) -> Optional[openapi.Schema]:
-        """Generates an OpenAPI schema for a single field."""
+        """
+        Generates an OpenAPI schema for a single field.
+
+        Args:
+            field: A MongoEngine field instance.
+
+        Returns:
+            Optional[openapi.Schema]: The corresponding OpenAPI schema or None.
+        """
         openapi_type = OpenAPITypeMapper.get_openapi_type(field)
         if not openapi_type:
             return None
@@ -57,24 +81,56 @@ class SchemaGenerator:
             )
 
     def _get_reference_field_schema(self, field: Any) -> openapi.Schema:
-        """Generates schema for ReferenceField."""
+        """
+        Generates schema for ReferenceField.
+
+        Args:
+            field: A MongoEngine ReferenceField.
+
+        Returns:
+            openapi.Schema: OpenAPI schema representing the reference.
+        """
         related_model = field.document_type
         properties = self._get_model_fields_schema(related_model)
         return openapi.Schema(type=openapi.TYPE_OBJECT, properties=properties)
 
     def _get_embedded_field_schema(self, field: Any) -> openapi.Schema:
-        """Generates schema for EmbeddedDocumentField."""
+        """
+        Generates schema for EmbeddedDocumentField.
+
+        Args:
+            field: A MongoEngine EmbeddedDocumentField.
+
+        Returns:
+            openapi.Schema: OpenAPI schema representing the embedded document.
+        """
         embedded_model = field.document_type
         properties = self._get_model_fields_schema(embedded_model)
         return openapi.Schema(type=openapi.TYPE_OBJECT, properties=properties)
 
     def _get_list_field_schema(self, field: Any) -> openapi.Schema:
-        """Generates schema for ListField."""
+        """
+        Generates schema for ListField.
+
+        Args:
+            field: A MongoEngine ListField.
+
+        Returns:
+            openapi.Schema: OpenAPI schema representing a list.
+        """
         inner_schema = self._get_field_schema(field.field)
         return openapi.Schema(type=openapi.TYPE_ARRAY, items=inner_schema or openapi.Schema(type=openapi.TYPE_STRING))
 
     def _get_model_fields_schema(self, model_class: Type[mongoengine.Document]) -> Dict[str, openapi.Schema]:
-        """Generates schema properties for a model."""
+        """
+        Generates schema properties for a MongoEngine model.
+
+        Args:
+            model_class: The model class to inspect.
+
+        Returns:
+            Dict[str, openapi.Schema]: Field name to schema mappings.
+        """
         properties = {}
         for name, field in model_class._fields.items():
             if getattr(field, 'primary_key', False) or name == 'id':
@@ -85,7 +141,12 @@ class SchemaGenerator:
         return properties
 
     def generate(self) -> openapi.Schema:
-        """Generates the main OpenAPI schema."""
+        """
+        Generates the full OpenAPI schema.
+
+        Returns:
+            openapi.Schema: The resulting schema object.
+        """
         schema = openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties=self.fields,
@@ -96,7 +157,11 @@ class SchemaGenerator:
         return schema
 
     def get_example_response(self) -> Dict[str, Any]:
-        """Generates an example response for the schema."""
+        """
+        Generates a sample example response for the schema.
+
+        Returns:
+            Dict[str, Any]: Sample data structure matching the schema.
+        """
         example_object = {name: schema.example for name, schema in self.fields.items()}
         return {'data': [example_object] * 3} if self.many else example_object
-

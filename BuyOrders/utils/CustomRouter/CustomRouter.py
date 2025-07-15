@@ -1,55 +1,69 @@
+from typing import List, Type, Any
 from django.urls import path
+from rest_framework.views import APIView
 
 
 class CustomRouter:
+    """
+    Custom router for registering Django URL patterns for RESTful API views.
+    Supports bulk and single operations, as well as custom actions.
+    """
 
-    urls = []
+    def __init__(self) -> None:
+        """Initialize the router with an empty list of URL patterns."""
+        self.urls: List[Any] = []
 
-    def __init__(self):
+    def register(self, url: str, view: Type[APIView]) -> None:
+        """
+        Register URL patterns for the given view class.
 
-        self.urls = []
+        Args:
+            url: Base URL path for the view (e.g., 'items').
+            view: The APIView class to register.
+            name: Optional name for the URL pattern (not used currently).
 
-    def register(self, url, view, name=None):
+        Returns:
+            None: Adds URL patterns to the internal urls list.
+        """
+        # Ensure URL ends with a trailing slash
+        url = url.rstrip('/') + '/'
 
-        url = url if url[-1] == '/' else url+'/'
+        # Instantiate view to access its methods
+        view_instance = view()
 
-        view_ = view()
+        # Get custom action methods from the view
+        action_list = view_instance.get_action_fun_list()
 
-        action_list = view_.get_action_fun_list()
-
-        self.urls += [
-
-            path(url, view.as_view({                                 # bulk
-
+        # Register URL patterns for bulk operations
+        self.urls.append(
+            path(url, view.as_view({
                 'get': 'bulk_get',
                 'post': 'bulk_post_request',
                 'patch': 'bulk_patch_request',
                 'delete': 'bulk_delete_request',
+            }))
+        )
 
-            })),
-
-            path(f'{url}s/<slug_field>/', view.as_view({
-
+        # Register URL patterns for single operations
+        self.urls.append(
+            path(f'{url}<str:slug_field>/', view.as_view({
                 'get': 'single_get',
                 'patch': 'single_patch_request',
                 'delete': 'single_delete_request',
-            })),
+            }))
+        )
 
-            path(f'{url}c/', view.as_view({
-
+        # Register URL pattern for single POST operation
+        self.urls.append(
+            path(f'{url}create/', view.as_view({
                 'post': 'single_post_request',
             }))
+        )
 
-        ]
-
-        for action_name, _ in action_list.items():
-
-            self.urls += [
-
-                path(f'{url}<slug>/{action_name}/', view.as_view({
-
-                    'post': f'action_{action_name}'
-
-                })),
-
-            ]
+        # Register URL patterns for custom actions
+        for action_name in action_list:
+            self.urls.append(
+                path(f'{url}<str:slug>/{action_name}/', view.as_view({
+                    'post': f'action_{action_name}',
+                }))
+            )

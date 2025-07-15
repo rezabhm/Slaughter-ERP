@@ -1,9 +1,9 @@
 # apps/production_order/signals.py
 
 from mongoengine import signals
-from .documents import ProductionOrder
-from .elasticsearch import index_product_order, delete_product_order
-from .serializer import ProductionOrderSerializer
+from apps.buy.documents import ProductionOrder
+from apps.buy.elasticsearch.utils import index_product_order, delete_product_order
+from apps.buy.serializer import ProductionOrderSerializer
 
 
 @signals.post_save.connect

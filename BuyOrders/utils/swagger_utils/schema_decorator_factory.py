@@ -1,21 +1,22 @@
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Type
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from bson import ObjectId
-import mongoengine
 
 from utils.swagger_utils.operation_config import OperationConfig
 from utils.swagger_utils.schema_generator import SchemaGenerator
 
 
 class SwaggerDecoratorFactory:
-    """Factory for generating swagger_auto_schema decorators."""
+    """
+    Factory for generating configured swagger_auto_schema decorators
+    for different API operation types and serializers.
+    """
 
     @staticmethod
     def create_decorator(
-            serializer_class: Type,
-            method: str,
-            many: bool = True
+        serializer_class: Type,
+        method: str,
+        many: bool = True
     ) -> callable:
         """
         Creates a swagger_auto_schema decorator for a given method and serializer.
@@ -31,7 +32,6 @@ class SwaggerDecoratorFactory:
         schema_generator = SchemaGenerator(serializer_class, many)
         operation_config = OperationConfig.get_config(method, schema_generator.model)
 
-        # Generate request body schema based on operation
         request_body = None
         if operation_config['uses_request_body']:
             schema = schema_generator.generate()
@@ -40,13 +40,13 @@ class SwaggerDecoratorFactory:
                     type=openapi.TYPE_OBJECT,
                     properties={'data': schema}
                 )
-            elif method in ['single_delete']:
+            elif method == 'single_delete':
                 request_body = openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={'id': openapi.Schema(type=openapi.TYPE_STRING)},
                     required=['id']
                 )
-            elif method in ['bulk_delete']:
+            elif method == 'bulk_delete':
                 request_body = openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
@@ -60,7 +60,6 @@ class SwaggerDecoratorFactory:
             else:
                 request_body = schema
 
-        # Prepare swagger_auto_schema kwargs
         kwargs = {
             'operation_id': f"{method}_{schema_generator.model.__name__.lower()}",
             'operation_summary': operation_config['summary'],
@@ -79,4 +78,3 @@ class SwaggerDecoratorFactory:
             kwargs['request_body'] = request_body
 
         return swagger_auto_schema(**kwargs)
-

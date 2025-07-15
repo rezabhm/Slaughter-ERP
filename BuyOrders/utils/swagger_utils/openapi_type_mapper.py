@@ -1,19 +1,18 @@
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Optional
 from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
-from bson import ObjectId
-import mongoengine
 
 
 class OpenAPITypeMapper:
-    """Maps MongoEngine field types to OpenAPI schema types."""
+    """
+    Maps MongoEngine field types to OpenAPI schema types and provides example values.
+    """
 
     MONGO_TO_OPENAPI = {
         'StringField': openapi.TYPE_STRING,
         'IntField': openapi.TYPE_INTEGER,
         'FloatField': openapi.TYPE_NUMBER,
         'BooleanField': openapi.TYPE_BOOLEAN,
-        'DateTimeField': openapi.TYPE_STRING,  # Using string for datetime to match format
+        'DateTimeField': openapi.TYPE_STRING,
         'EmbeddedDocumentField': openapi.TYPE_OBJECT,
         'ListField': openapi.TYPE_ARRAY,
         'ReferenceField': openapi.TYPE_STRING,
@@ -30,10 +29,26 @@ class OpenAPITypeMapper:
 
     @classmethod
     def get_openapi_type(cls, field: Any) -> Optional[str]:
-        """Returns the OpenAPI type for a given MongoEngine field."""
+        """
+        Returns the OpenAPI type for a given MongoEngine field.
+
+        Args:
+            field: MongoEngine field instance.
+
+        Returns:
+            Optional[str]: Corresponding OpenAPI type, if available.
+        """
         return cls.MONGO_TO_OPENAPI.get(field.__class__.__name__)
 
     @classmethod
     def get_example_value(cls, openapi_type: str) -> Any:
-        """Returns an example value for a given OpenAPI type."""
+        """
+        Returns an example value for a given OpenAPI type.
+
+        Args:
+            openapi_type: The OpenAPI type string.
+
+        Returns:
+            Any: An example value matching the OpenAPI type.
+        """
         return cls.EXAMPLE_VALUES.get(openapi_type, 'unknown')

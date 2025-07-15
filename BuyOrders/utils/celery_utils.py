@@ -16,5 +16,5 @@ def store_logs_in_background(logs_data: dict, log_server_information: dict, toke
         token: authentication token
     """
 
-    res = requests.post(url=log_server_information['endpoint_url'], json=logs_data,
+    _ = requests.post(url=log_server_information['endpoint_url'], json=logs_data,
                         headers={'Authorization': f'Bearer {token}'})

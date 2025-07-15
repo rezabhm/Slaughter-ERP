@@ -8,7 +8,7 @@ from utils.permissions import RoleBasedPermission
 from utils.CustomAPIView.base_api_view import BaseMongoAPIView
 
 
-class CustomAPIView(BaseMongoAPIView, GetMongoAPIView, PostMongoAPIView, PatchMongoAPIView, DeleteMongoAPIView):
+class CustomAPIView(GetMongoAPIView, PostMongoAPIView, PatchMongoAPIView, DeleteMongoAPIView, BaseMongoAPIView):
     """Main API view that routes requests to appropriate method-specific handlers."""
 
     authentication_classes = [CustomJWTAuthentication]

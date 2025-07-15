@@ -50,5 +50,6 @@ urlpatterns = [
     # API version 1
     path('api/v1/', include('api.v1.routers')),
 
+    # GraphQL endpoint
     path("graph-ql/", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
 ]

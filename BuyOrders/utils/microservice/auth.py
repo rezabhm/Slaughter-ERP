@@ -1,35 +1,51 @@
+from typing import Optional
 import requests
 from django.conf import settings
 
 
-def load_slaughter_erp_token():
+def load_slaughter_erp_token() -> Optional[str]:
+    """
+    Load or refresh the Slaughter ERP authentication token.
 
-    with open('configs\\settings\\jwt\\token.txt', 'r') as fd:
-        token = fd.read()
-        fd.close()
+    Returns:
+        Optional[str]: The valid JWT token if available, else None.
+    """
+    try:
+        # Attempt to read existing token from file
+        with open('configs/settings/jwt/token.txt', 'r') as fd:
+            token = fd.read().strip()
 
-    res = requests.get(settings.MICROSERVICE_URL['test_token'], headers={'Authorization': f'Bearer {token}'})
+        # Verify token validity
+        response = requests.get(
+            settings.MICROSERVICE_URL['test_token'],
+            headers={'Authorization': f'Bearer {token}'}
+        )
 
-    if res.status_code in range(199, 299):
-        return token
-    else:
+        if 199 <= response.status_code <= 299:
+            return token
 
-        username = settings.MICROSERVICE_CONFIGS['SlaughterERP']['username']
-        password = settings.MICROSERVICE_CONFIGS['SlaughterERP']['password']
+    except (FileNotFoundError, requests.RequestException):
+        pass
 
-        post_request_data = {
-            "username": username,
-            "password": password
+    # Token invalid or not found, attempt to refresh
+    try:
+        auth_data = {
+            'username': settings.MICROSERVICE_CONFIGS['SlaughterERP']['username'],
+            'password': settings.MICROSERVICE_CONFIGS['SlaughterERP']['password']
         }
 
-        res = requests.post(settings.MICROSERVICE_URL['login'], json=post_request_data)
+        response = requests.post(
+            settings.MICROSERVICE_URL['login'],
+            json=auth_data
+        )
 
-        if res.status_code in range(199, 299):
-            with open('configs\\settings\\jwt\\token.txt', 'w') as fd:
-                fd.write(res.json()['access'])
-                fd.close()
+        if 199 <= response.status_code <= 299:
+            new_token = response.json()['access']
+            with open('configs/settings/jwt/token.txt', 'w') as fd:
+                fd.write(new_token)
+            return new_token
 
-            return res.json()['access']
+    except (requests.RequestException, KeyError, FileNotFoundError):
+        pass
 
-        else:
-            return None
+    return None

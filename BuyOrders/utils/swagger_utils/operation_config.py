@@ -1,12 +1,13 @@
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, Type
 from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
-from bson import ObjectId
 import mongoengine
 
 
 class OperationConfig:
-    """Defines configuration for API operations."""
+    """
+    Defines reusable configurations for various API operations
+    such as single/bulk POST, PATCH, GET, DELETE.
+    """
 
     CONFIGS = {
         'single_post': {
@@ -58,8 +59,10 @@ class OperationConfig:
             'status_code': 200,
             'parameters': [
                 openapi.Parameter(
-                    'id', openapi.IN_QUERY, description='ID of the object',
-                    type=openapi.TYPE_STRING, required=True
+                    'id', openapi.IN_QUERY,
+                    description='ID of the object',
+                    type=openapi.TYPE_STRING,
+                    required=True
                 )
             ]
         },
@@ -70,9 +73,12 @@ class OperationConfig:
             'status_code': 200,
             'parameters': [
                 openapi.Parameter(
-                    'ids', openapi.IN_QUERY, description='Comma-separated list of IDs',
-                    type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING),
-                    required=True, collection_format='csv'
+                    'ids', openapi.IN_QUERY,
+                    description='Comma-separated list of IDs',
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_STRING),
+                    required=True,
+                    collection_format='csv'
                 )
             ]
         }
@@ -80,7 +86,16 @@ class OperationConfig:
 
     @classmethod
     def get_config(cls, method: str, model: Type[mongoengine.Document]) -> Dict[str, Any]:
-        """Retrieves configuration for a given method."""
+        """
+        Retrieves configuration for a given operation method and model.
+
+        Args:
+            method: Operation name (e.g. 'single_post', 'bulk_get').
+            model: The MongoEngine model class.
+
+        Returns:
+            Dict[str, Any]: Operation metadata including summary, description, method, etc.
+        """
         config = cls.CONFIGS.get(method)
         if not config:
             raise ValueError(f"Unsupported method: {method}")
@@ -92,4 +107,3 @@ class OperationConfig:
             'parameters': config.get('parameters', []),
             'uses_request_body': config.get('uses_request_body', False)
         }
-

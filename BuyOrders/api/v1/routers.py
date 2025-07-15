@@ -8,9 +8,9 @@ from utils.CustomRouter.CustomRouter import CustomRouter
 router = CustomRouter()
 
 router.register('buy/production-product', ProductionOrderAPIView)
-# router.register('order/bank-account', BankAccountAPIView)
-# router.register('order/invoice', InvoiceAPIView)
-# router.register('order/payment', PaymentAPIView)
-# router.register('order/purchase-order', PurchaseOrderAPIView)
+router.register('order/bank-account', BankAccountAPIView)
+router.register('order/invoice', InvoiceAPIView)
+router.register('order/payment', PaymentAPIView)
+router.register('order/purchase-order', PurchaseOrderAPIView)
 
 urlpatterns = router.urls

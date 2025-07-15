@@ -1,13 +1,12 @@
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Union
 from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from bson import ObjectId
-import mongoengine
-
 
 
 class DynamicSchemaGenerator:
-    """Generates OpenAPI schemas from arbitrary dictionaries."""
+    """
+    Generates OpenAPI schemas dynamically from Python dictionaries or lists.
+    """
 
     @staticmethod
     def generate(data: Union[Dict[str, Any], List[Any]], schema_name: str = "DynamicSchema") -> openapi.Schema:
@@ -23,7 +22,15 @@ class DynamicSchemaGenerator:
         """
 
         def infer_type(value: Any) -> tuple[openapi.Schema, bool]:
-            """Infers the OpenAPI type for a given value and whether it's required."""
+            """
+            Infers the OpenAPI type for a given value and whether it's required.
+
+            Args:
+                value: The value to infer the type for.
+
+            Returns:
+                Tuple[openapi.Schema, bool]: The inferred schema and whether it's required.
+            """
             if value is None:
                 return openapi.Schema(type=openapi.TYPE_STRING, nullable=True), False
             elif isinstance(value, bool):
@@ -44,18 +51,27 @@ class DynamicSchemaGenerator:
                     return openapi.Schema(type=openapi.TYPE_ARRAY, items=item_schema), True
                 return openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)), True
             else:
-                return openapi.Schema(type=openapi.TYPE_STRING,
-                                      description=f"Unknown type: {type(value).__name__}"), True
+                return openapi.Schema(type=openapi.TYPE_STRING, description=f"Unknown type: {type(value).__name__}"), True
 
         def process_dict(data: Dict[str, Any]) -> openapi.Schema:
-            """Processes a dictionary to create an OpenAPI schema."""
+            """
+            Processes a dictionary to create an OpenAPI schema.
+
+            Args:
+                data: The dictionary to process.
+
+            Returns:
+                openapi.Schema: The resulting schema.
+            """
             properties = {}
             required = []
+
             for key, value in data.items():
                 schema, is_required = infer_type(value)
                 properties[key] = schema
                 if is_required:
                     required.append(key)
+
             return openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties=properties,
@@ -63,7 +79,15 @@ class DynamicSchemaGenerator:
             )
 
         def process_list(data: List[Any]) -> openapi.Schema:
-            """Processes a list to create an OpenAPI schema."""
+            """
+            Processes a list to create an OpenAPI schema.
+
+            Args:
+                data: The list to process.
+
+            Returns:
+                openapi.Schema: The resulting schema.
+            """
             if not data:
                 return openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING))
             item_schema, _ = infer_type(data[0])
