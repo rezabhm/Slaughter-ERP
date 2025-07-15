@@ -74,6 +74,15 @@ class PurchaseOrderAPIView(CustomAPIView):
             'DELETE': ['admin'],
         }
 
+        self.elasticsearch_index_name = 'purchase_order'
+        self.elasticsearch_fields = [
+            "product_name",
+            "estimated_price",
+            "status",
+            "planned_purchase_date",
+            "final_price"
+        ]
+
     def get_queryset(self):
         """
         Fetch all PurchaseOrder documents.

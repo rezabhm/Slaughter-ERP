@@ -58,6 +58,10 @@ class BankAccountAPIView(CustomAPIView):
             'DELETE': ['admin'],
         }
 
+        # Elasticsearch integration config
+        self.elasticsearch_index_name = 'bank_account'
+        self.elasticsearch_fields = ["owner_name", "account_number"]
+
     def get_queryset(self):
         """
         Retrieve all BankAccount objects from the database.

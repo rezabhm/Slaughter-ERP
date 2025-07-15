@@ -59,6 +59,10 @@ class PaymentAPIView(CustomAPIView):
             'DELETE': ['admin'],
         }
 
+        self.elasticsearch_index_name = 'payment'
+        self.elasticsearch_fields = ["amount", "payment_type", "from_account", "to_account", "payment_description",
+                                     "invoice"]
+
     def get_queryset(self):
         """
         Retrieve all Payment documents from the database.

@@ -65,6 +65,9 @@ class InvoiceAPIView(CustomAPIView):
             'DELETE': ['admin'],
         }
 
+        self.elasticsearch_index_name = 'invoice'
+        self.elasticsearch_fields = ["invoice_number", "title", "description", "purchase_date", "seller", "is_paid"]
+
     def get_queryset(self):
         """
         Retrieve all Invoice documents.
