@@ -130,4 +130,9 @@ ELASTICSEARCH_CONNECTION = Elasticsearch(
     basic_auth=('elastic', 'PaJ*8-X9YaOD+YyGcBRk'),
     verify_certs=False  # ⛔ غیرفعال کردن بررسی گواهی SSL
 )
-ELASTICSEARCH_STATUS = True
+ELASTICSEARCH_STATUS = False
+
+# GraphQL schema
+GRAPHENE = {
+    'SCHEMA': 'GraphQL.schema.schema'
+}

@@ -6,8 +6,8 @@ def index_document(index_name: str, properties: dict):
     index document if dose not exist
 
     Args:
-         index_name: document index name in elasticsearch
-         properties: documents fields in elasticsearch
+         index_name: document index name in elasticsearch_api
+         properties: documents fields in elasticsearch_api
 
     """
     es = settings.ELASTICSEARCH_CONNECTION

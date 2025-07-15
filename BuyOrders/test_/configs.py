@@ -10,10 +10,9 @@ ip_server = 'http://127.0.0.1:8001/api/v1/buy'
 crud_test_configs = {
 
     "swagger_api_schema_url": swagger_schema_url,
-    "token":token,
+    "token": token,
     "ip_server": ip_server,
     "endpoints": [
-
         "/production-product/"
     ]
 

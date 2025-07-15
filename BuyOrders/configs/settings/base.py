@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework_simplejwt',
     'django_filters',
+    'graphene_django',
 
 ]
 

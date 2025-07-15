@@ -8,7 +8,7 @@
   "apis": [
 
     {
-      "endpoint": "buy/production-product/?q=unkn",
+      "endpoint": "buy/production-product/",
       "data": {},
       "expected_response": {
         "body": {

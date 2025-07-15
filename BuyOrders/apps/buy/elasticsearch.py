@@ -4,7 +4,6 @@ from utils.elasticsearch import index_document
 
 
 def create_index_production_order_document():
-    print('indexxx product order')
     index_document(
         index_name='production_order',
         properties={
@@ -21,13 +20,12 @@ def create_index_production_order_document():
 
 def index_product_order(validated_data: dict):
     """
-    index data to elasticsearch
+    index data to elasticsearch_api
 
     Args:
         validated_data: product orders object serializer data
     """
     es = settings.ELASTICSEARCH_CONNECTION
-    print('index object')
 
     try:
         car_postfix_number = validated_data['car']['car']['postfix_number']
@@ -82,8 +80,6 @@ def delete_product_order(document_id: str):
         document_id: ID of document to delete
     """
     es = settings.ELASTICSEARCH_CONNECTION
-    print('delete  object')
-
 
     if es.exists(index='production_order', id=document_id):
         es.delete(index='production_order', id=document_id)
@@ -101,7 +97,6 @@ def search_production_order(keyword: str) -> dict:
         dict: return search results
     """
     es = settings.ELASTICSEARCH_CONNECTION
-    print('search')
 
     return es.search(
         index='production_order',

@@ -232,7 +232,7 @@ class BaseMongoAPIView(GenericAPIView, ViewSet):
 
     def search_elasticsearch(self, query: str):
         """
-        search in elasticsearch
+        search in elasticsearch_api
 
         Args:
             query: query string from url params
