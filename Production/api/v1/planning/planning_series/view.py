@@ -1,47 +1,89 @@
 from django.utils.decorators import method_decorator
 
-from api.v1.planning.planning_series.conf import status_dict
-from api.v1.planning.planning_series.swagger import FinishedSwaggerSerializer
+from api.v1.planning.planning_series.swagger_decorator import (
+    bulk_post_request_decorator,
+    single_post_request_decorator,
+    bulk_patch_request_decorator,
+    single_patch_request_decorator,
+    bulk_get_decorator,
+    single_get_decorator,
+    bulk_delete_request_decorator,
+    single_delete_request_decorator,
+    action_finished_decorator,
+)
 from api.v1.planning.planning_series.utils import handle_finished
 from apps.planning.documents import PlanningSeries
-from apps.planning.serializers import PlanningSeriesSerializerPOST, PlanningSeriesSerializer
+from apps.planning.serializers import PlanningSeriesSerializer, PlanningSeriesSerializerPOST
 from utils.CustomAPIView.api_view import CustomAPIView
-from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
-@method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesSerializerPOST, method='bulk_post', many=True))
-@method_decorator(name='single_post_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesSerializerPOST, method='single_post', many=False))
-@method_decorator(name='bulk_patch_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesSerializer, method='bulk_patch', many=True))
-@method_decorator(name='single_patch_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesSerializer, method='single_patch', many=False))
-@method_decorator(name='bulk_get', decorator=custom_swagger_generator(serializer_class=PlanningSeriesSerializer, method='bulk_get', many=True))
-@method_decorator(name='single_get', decorator=custom_swagger_generator(serializer_class=PlanningSeriesSerializer, method='single_get', many=False))
-@method_decorator(name='bulk_delete_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesSerializer, method='bulk_delete', many=True))
-@method_decorator(name='single_delete_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesSerializer, method='single_delete', many=False))
-@method_decorator(name='action_finished', decorator=action_swagger_documentation(summaries='Finish Planning Series', action_name='finished', description='Mark the planning series as finished.', serializer_class=FinishedSwaggerSerializer, res={'200': status_dict['finished']}))
+@method_decorator(name='bulk_post_request', decorator=bulk_post_request_decorator)
+@method_decorator(name='single_post_request', decorator=single_post_request_decorator)
+@method_decorator(name='bulk_patch_request', decorator=bulk_patch_request_decorator)
+@method_decorator(name='single_patch_request', decorator=single_patch_request_decorator)
+@method_decorator(name='bulk_get', decorator=bulk_get_decorator)
+@method_decorator(name='single_get', decorator=single_get_decorator)
+@method_decorator(name='bulk_delete_request', decorator=bulk_delete_request_decorator)
+@method_decorator(name='single_delete_request', decorator=single_delete_request_decorator)
+@method_decorator(name='action_finished', decorator=action_finished_decorator)
 class PlanningSeriesAPIView(CustomAPIView):
+    """
+    API view to manage PlanningSeries documents via CRUD and workflow actions.
 
-    model = PlanningSeries
-    lookup_field = 'id'
-    ordering_fields = '-create__date'
+    Features:
+        - Full CRUD operations with role-based permissions.
+        - Custom workflow actions (finished)
+        - Swagger documentation for all operations.
+    """
 
-    serializer_class = {
-        'GET': PlanningSeriesSerializer,
-        'POST': PlanningSeriesSerializerPOST,
-        'PATCH': PlanningSeriesSerializer,
-        'PERFORM_ACTION': {}
-    }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    allowed_roles = {
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
-    }
+        # MongoEngine document model
+        self.model = PlanningSeries
+
+        # Field used for retrieving a single object
+        self.lookup_field = 'id'
+
+        # Default ordering applied to queryset
+        self.ordering_fields = '-create__date'
+
+        # Serializers per HTTP method
+        self.serializer_class = {
+            'GET': PlanningSeriesSerializer,
+            'POST': PlanningSeriesSerializerPOST,
+            'PATCH': PlanningSeriesSerializer,
+            'PERFORM_ACTION': {}
+        }
+
+        # Role-based access control
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+            'PERFORM_ACTION': ['admin'],
+        }
+
+        self.elasticsearch_index_name = 'planning_series'
+        self.elasticsearch_fields = [
+            "name",
+            "status",
+        ]
 
     def get_queryset(self):
+        """
+        Fetch all PlanningSeries documents.
+
+        Returns:
+            QuerySet: All PlanningSeries objects.
+        """
         return PlanningSeries.objects()
 
     def action_finished(self, request, slug=None):
+        """
+        Mark the planning series as finished.
+        """
         return handle_finished(
             user=request.user_payload['username'],
             slug_id=slug,

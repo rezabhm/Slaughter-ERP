@@ -1,44 +1,76 @@
 from django.utils.decorators import method_decorator
 
+from api.v1.warehouse.Inventory.swagger_decorator import (
+    bulk_post_request_decorator,
+    single_post_request_decorator,
+    bulk_patch_request_decorator,
+    single_patch_request_decorator,
+    bulk_get_decorator,
+    single_get_decorator,
+    bulk_delete_request_decorator,
+    single_delete_request_decorator,
+)
 from apps.warehouse.documents import Inventory
-from apps.warehouse.serializer import InventorySerializer, \
-    InventorySerializerPOST
+from apps.warehouse.serializer import InventorySerializer, InventorySerializerPOST
 from utils.CustomAPIView.api_view import CustomAPIView
-from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator
 
 
-@method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=InventorySerializerPOST, method='bulk_post', many=True))
-@method_decorator(name='single_post_request', decorator=custom_swagger_generator(serializer_class=InventorySerializerPOST, method='single_post', many=False))
-@method_decorator(name='bulk_patch_request', decorator=custom_swagger_generator(serializer_class=InventorySerializer, method='bulk_patch', many=True))
-@method_decorator(name='single_patch_request', decorator=custom_swagger_generator(serializer_class=InventorySerializer, method='single_patch', many=False))
-@method_decorator(name='bulk_get', decorator=custom_swagger_generator(serializer_class=InventorySerializer, method='bulk_get', many=True))
-@method_decorator(name='single_get', decorator=custom_swagger_generator(serializer_class=InventorySerializer, method='single_get', many=False))
-@method_decorator(name='bulk_delete_request', decorator=custom_swagger_generator(serializer_class=InventorySerializer, method='bulk_delete', many=True))
-@method_decorator(name='single_delete_request', decorator=custom_swagger_generator(serializer_class=InventorySerializer, method='single_delete', many=False))
+@method_decorator(name='bulk_post_request', decorator=bulk_post_request_decorator)
+@method_decorator(name='single_post_request', decorator=single_post_request_decorator)
+@method_decorator(name='bulk_patch_request', decorator=bulk_patch_request_decorator)
+@method_decorator(name='single_patch_request', decorator=single_patch_request_decorator)
+@method_decorator(name='bulk_get', decorator=bulk_get_decorator)
+@method_decorator(name='single_get', decorator=single_get_decorator)
+@method_decorator(name='bulk_delete_request', decorator=bulk_delete_request_decorator)
+@method_decorator(name='single_delete_request', decorator=single_delete_request_decorator)
 class InventoryAPIView(CustomAPIView):
+    """
+    API view to manage Inventory documents via CRUD operations.
 
-    model = Inventory
-    lookup_field = 'id'
-    ordering_fields = '-create_date__date'
+    Features:
+        - Full CRUD operations with role-based permissions.
+        - Swagger documentation for all operations.
+    """
 
-    serializer_class = {
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        'GET': InventorySerializer,
-        'POST': InventorySerializerPOST,
-        'PATCH': InventorySerializer,
-        'PERFORM_ACTION': {}
+        # MongoEngine document model
+        self.model = Inventory
 
-    }
+        # Field used for retrieving a single object
+        self.lookup_field = 'id'
 
-    allowed_roles = {
+        # Default ordering applied to queryset
+        self.ordering_fields = '-create_date__date'
 
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
+        # Serializers per HTTP method
+        self.serializer_class = {
+            'GET': InventorySerializer,
+            'POST': InventorySerializerPOST,
+            'PATCH': InventorySerializer,
+            'PERFORM_ACTION': {}
+        }
 
-    }
+        # Role-based access control
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+        }
+
+        self.elasticsearch_index_name = 'inventory'
+        self.elasticsearch_fields = [
+            "product_name",
+            "quantity",
+        ]
 
     def get_queryset(self):
-        return Inventory.objects()
+        """
+        Fetch all Inventory documents.
 
+        Returns:
+            QuerySet: All Inventory objects.
+        """
+        return Inventory.objects()

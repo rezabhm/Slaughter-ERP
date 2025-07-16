@@ -1,52 +1,90 @@
 from django.utils.decorators import method_decorator
 
-from api.v1.warehouse.transaction.conf import *
-from api.v1.warehouse.transaction.swagger import VerifySwagger
+from api.v1.warehouse.transaction.swagger_decorator import (
+    bulk_post_request_decorator,
+    single_post_request_decorator,
+    bulk_patch_request_decorator,
+    single_patch_request_decorator,
+    bulk_get_decorator,
+    single_get_decorator,
+    bulk_delete_request_decorator,
+    single_delete_request_decorator,
+    action_verify_decorator,
+)
 from api.v1.warehouse.transaction.utils import verify_transaction
 from apps.warehouse.documents import Transaction
 from apps.warehouse.serializer import TransactionSerializer, TransactionSerializerPOST
 from utils.CustomAPIView.api_view import CustomAPIView
-from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
-@method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=TransactionSerializerPOST, method='bulk_post', many=True))
-@method_decorator(name='single_post_request', decorator=custom_swagger_generator(serializer_class=TransactionSerializerPOST, method='single_post', many=False))
-@method_decorator(name='bulk_patch_request', decorator=custom_swagger_generator(serializer_class=TransactionSerializer, method='bulk_patch', many=True))
-@method_decorator(name='single_patch_request', decorator=custom_swagger_generator(serializer_class=TransactionSerializer, method='single_patch', many=False))
-@method_decorator(name='bulk_get', decorator=custom_swagger_generator(serializer_class=TransactionSerializer, method='bulk_get', many=True))
-@method_decorator(name='single_get', decorator=custom_swagger_generator(serializer_class=TransactionSerializer, method='single_get', many=False))
-@method_decorator(name='bulk_delete_request', decorator=custom_swagger_generator(serializer_class=TransactionSerializer, method='bulk_delete', many=True))
-@method_decorator(name='single_delete_request', decorator=custom_swagger_generator(serializer_class=TransactionSerializer, method='single_delete', many=False))
-@method_decorator(name='action_verify', decorator=action_swagger_documentation(summaries='verify transaction', action_name='action verify', description='varify transaction . if warehouse is inactive it didnt verify transaction ', serializer_class=VerifySwagger, res={'200': http_200_transaction, "404": http_404_transaction, "400": http_400_transaction}))
+@method_decorator(name='bulk_post_request', decorator=bulk_post_request_decorator)
+@method_decorator(name='single_post_request', decorator=single_post_request_decorator)
+@method_decorator(name='bulk_patch_request', decorator=bulk_patch_request_decorator)
+@method_decorator(name='single_patch_request', decorator=single_patch_request_decorator)
+@method_decorator(name='bulk_get', decorator=bulk_get_decorator)
+@method_decorator(name='single_get', decorator=single_get_decorator)
+@method_decorator(name='bulk_delete_request', decorator=bulk_delete_request_decorator)
+@method_decorator(name='single_delete_request', decorator=single_delete_request_decorator)
+@method_decorator(name='action_verify', decorator=action_verify_decorator)
 class TransactionAPIView(CustomAPIView):
+    """
+    API view to manage Transaction documents via CRUD and workflow actions.
 
-    model = Transaction
-    lookup_field = 'id'
-    ordering_fields = '-create_date__date'
+    Features:
+        - Full CRUD operations with role-based permissions.
+        - Custom workflow actions (verify)
+        - Swagger documentation for all operations.
+    """
 
-    serializer_class = {
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        'GET': TransactionSerializer,
-        'POST': TransactionSerializerPOST,
-        'PATCH': TransactionSerializer,
-        'PERFORM_ACTION': {}
+        # MongoEngine document model
+        self.model = Transaction
 
-    }
+        # Field used for retrieving a single object
+        self.lookup_field = 'id'
 
-    allowed_roles = {
+        # Default ordering applied to queryset
+        self.ordering_fields = '-create_date__date'
 
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
+        # Serializers per HTTP method
+        self.serializer_class = {
+            'GET': TransactionSerializer,
+            'POST': TransactionSerializerPOST,
+            'PATCH': TransactionSerializer,
+            'PERFORM_ACTION': {}
+        }
 
-    }
+        # Role-based access control
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+            'PERFORM_ACTION': ['admin'],
+        }
+
+        self.elasticsearch_index_name = 'transaction'
+        self.elasticsearch_fields = [
+            "product_name",
+            "quantity",
+            "type",
+        ]
 
     def get_queryset(self):
+        """
+        Fetch all Transaction documents.
+
+        Returns:
+            QuerySet: All Transaction objects.
+        """
         return Transaction.objects()
 
-    def action_verify(self, request, slug):
-
+    def action_verify(self, request, slug=None):
+        """
+        Verify a transaction.
+        """
         return verify_transaction(
             slug=slug,
             lookup_field=getattr(self, 'lookup_field', 'id')

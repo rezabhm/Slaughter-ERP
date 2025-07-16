@@ -1,58 +1,102 @@
 from django.utils.decorators import method_decorator
 
-from api.v1.production.production_series.swagger import FinishStartActionSerializer
-from api.v1.production.production_series.utils import *
+from api.v1.production.production_series.swagger_decorator import (
+    bulk_post_request_decorator,
+    single_post_request_decorator,
+    bulk_patch_request_decorator,
+    single_patch_request_decorator,
+    bulk_get_decorator,
+    single_get_decorator,
+    bulk_delete_request_decorator,
+    single_delete_request_decorator,
+    action_start_decorator,
+    action_finish_decorator,
+)
+from api.v1.production.production_series.utils import production_series_change_status
 from apps.production.documents import ProductionSeries
-from apps.production.serializers.production_series_serializer import ProductionSeriesSerializer, \
-    ProductionSeriesSerializerPOST
+from apps.production.serializers.production_series_serializer import (
+    ProductionSeriesSerializer,
+    ProductionSeriesSerializerPOST,
+)
 from utils.CustomAPIView.api_view import CustomAPIView
-from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
-@method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=ProductionSeriesSerializerPOST, method='bulk_post', many=True))
-@method_decorator(name='single_post_request', decorator=custom_swagger_generator(serializer_class=ProductionSeriesSerializerPOST, method='single_post', many=False))
-@method_decorator(name='bulk_patch_request', decorator=custom_swagger_generator(serializer_class=ProductionSeriesSerializer, method='bulk_patch', many=True))
-@method_decorator(name='single_patch_request', decorator=custom_swagger_generator(serializer_class=ProductionSeriesSerializer, method='single_patch', many=False))
-@method_decorator(name='bulk_get', decorator=custom_swagger_generator(serializer_class=ProductionSeriesSerializer, method='bulk_get', many=True))
-@method_decorator(name='single_get', decorator=custom_swagger_generator(serializer_class=ProductionSeriesSerializer, method='single_get', many=False))
-@method_decorator(name='bulk_delete_request', decorator=custom_swagger_generator(serializer_class=ProductionSeriesSerializer, method='bulk_delete', many=True))
-@method_decorator(name='single_delete_request', decorator=custom_swagger_generator(serializer_class=ProductionSeriesSerializer, method='single_delete', many=False))
-@method_decorator(name='action_start', decorator=action_swagger_documentation(summaries='Start a Production Series', action_name='start_production_series', description='Start the production series by recording the start time, user, and updating status to "started".', serializer_class=FinishStartActionSerializer, res=start_finish_action_200('start')))
-@method_decorator(name='action_finish', decorator=action_swagger_documentation(summaries='Finish a Production Series', action_name='finish_production_series', description='Finish the production series by setting the end time, user, and updating status to "finished".', serializer_class=FinishStartActionSerializer, res=start_finish_action_200('finish')))
+@method_decorator(name='bulk_post_request', decorator=bulk_post_request_decorator)
+@method_decorator(name='single_post_request', decorator=single_post_request_decorator)
+@method_decorator(name='bulk_patch_request', decorator=bulk_patch_request_decorator)
+@method_decorator(name='single_patch_request', decorator=single_patch_request_decorator)
+@method_decorator(name='bulk_get', decorator=bulk_get_decorator)
+@method_decorator(name='single_get', decorator=single_get_decorator)
+@method_decorator(name='bulk_delete_request', decorator=bulk_delete_request_decorator)
+@method_decorator(name='single_delete_request', decorator=single_delete_request_decorator)
+@method_decorator(name='action_start', decorator=action_start_decorator)
+@method_decorator(name='action_finish', decorator=action_finish_decorator)
 class ProductionSeriesAPIView(CustomAPIView):
+    """
+    API view to manage ProductionSeries documents via CRUD and workflow actions.
 
-    model = ProductionSeries
-    lookup_field = 'id'
-    ordering_fields = '-create__date'
+    Features:
+        - Full CRUD operations with role-based permissions.
+        - Custom workflow actions (start, finish)
+        - Swagger documentation for all operations.
+    """
 
-    serializer_class = {
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        'GET': ProductionSeriesSerializer,
-        'POST': ProductionSeriesSerializerPOST,
-        'PATCH': ProductionSeriesSerializer,
-        'PERFORM_ACTION': {
+        # MongoEngine document model
+        self.model = ProductionSeries
 
-            'start': FinishStartActionSerializer,
-            'finish': FinishStartActionSerializer
+        # Field used for retrieving a single object
+        self.lookup_field = 'id'
 
+        # Default ordering applied to queryset
+        self.ordering_fields = '-create__date'
+
+        # Serializers per HTTP method
+        self.serializer_class = {
+            'GET': ProductionSeriesSerializer,
+            'POST': ProductionSeriesSerializerPOST,
+            'PATCH': ProductionSeriesSerializer,
+            'PERFORM_ACTION': {},
         }
 
-    }
+        # Role-based access control
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+            'PERFORM_ACTION': ['admin'],
+        }
 
-    allowed_roles = {
-
-        'GET': ['any'],
-        'POST': ['any'],
-        'PATCH': ['any'],
-        'DELETE': ['any'],
-
-    }
+        self.elasticsearch_index_name = 'production_series'
+        self.elasticsearch_fields = [
+            "name",
+            "status",
+        ]
 
     def get_queryset(self):
+        """
+        Fetch all ProductionSeries documents.
+
+        Returns:
+            QuerySet: All ProductionSeries objects.
+        """
         return ProductionSeries.objects()
 
     def action_start(self, request, slug=None):
-        return production_series_change_status(request, slug, self.lookup_field, self.get_query, ps_status='start')
+        """
+        Start a Production Series.
+        """
+        return production_series_change_status(
+            request, slug, self.lookup_field, self.get_queryset(), ps_status='start'
+        )
 
     def action_finish(self, request, slug=None):
-        return production_series_change_status(request, slug, self.lookup_field, self.get_query, ps_status='finish')
+        """
+        Finish a Production Series.
+        """
+        return production_series_change_status(
+            request, slug, self.lookup_field, self.get_queryset(), ps_status='finish'
+        )

@@ -1,54 +1,90 @@
 from django.utils.decorators import method_decorator
 
-from api.v1.production.return_product.conf import status_200
-from api.v1.production.return_product.swagger import VerifyReturnProductSwagger
+from api.v1.production.return_product.swagger_decorator import (
+    bulk_post_request_decorator,
+    single_post_request_decorator,
+    bulk_patch_request_decorator,
+    single_patch_request_decorator,
+    bulk_get_decorator,
+    single_get_decorator,
+    bulk_delete_request_decorator,
+    single_delete_request_decorator,
+    action_verify_decorator,
+)
 from api.v1.production.return_product.utils import handle_verify
 from apps.production.documents import ReturnProduct
 from apps.production.serializers.return_product_serializer import ReturnProductSerializer, ReturnProductSerializerPOST
 from utils.CustomAPIView.api_view import CustomAPIView
-from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
-@method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=ReturnProductSerializerPOST, method='bulk_post', many=True))
-@method_decorator(name='single_post_request', decorator=custom_swagger_generator(serializer_class=ReturnProductSerializerPOST, method='single_post', many=False))
-@method_decorator(name='bulk_patch_request', decorator=custom_swagger_generator(serializer_class=ReturnProductSerializer, method='bulk_patch', many=True))
-@method_decorator(name='single_patch_request', decorator=custom_swagger_generator(serializer_class=ReturnProductSerializer, method='single_patch', many=False))
-@method_decorator(name='bulk_get', decorator=custom_swagger_generator(serializer_class=ReturnProductSerializer, method='bulk_get', many=True))
-@method_decorator(name='single_get', decorator=custom_swagger_generator(serializer_class=ReturnProductSerializer, method='single_get', many=False))
-@method_decorator(name='bulk_delete_request', decorator=custom_swagger_generator(serializer_class=ReturnProductSerializer, method='bulk_delete', many=True))
-@method_decorator(name='single_delete_request', decorator=custom_swagger_generator(serializer_class=ReturnProductSerializer, method='single_delete', many=False))
-@method_decorator(name='action_verify', decorator=action_swagger_documentation(summaries='verify return product object', action_name='seventh_step', description='verify return product object and set is_useful and is_repack parameter', serializer_class=VerifyReturnProductSwagger, res={'200': status_200}))
+@method_decorator(name='bulk_post_request', decorator=bulk_post_request_decorator)
+@method_decorator(name='single_post_request', decorator=single_post_request_decorator)
+@method_decorator(name='bulk_patch_request', decorator=bulk_patch_request_decorator)
+@method_decorator(name='single_patch_request', decorator=single_patch_request_decorator)
+@method_decorator(name='bulk_get', decorator=bulk_get_decorator)
+@method_decorator(name='single_get', decorator=single_get_decorator)
+@method_decorator(name='bulk_delete_request', decorator=bulk_delete_request_decorator)
+@method_decorator(name='single_delete_request', decorator=single_delete_request_decorator)
+@method_decorator(name='action_verify', decorator=action_verify_decorator)
 class ReturnProductAPIView(CustomAPIView):
+    """
+    API view to manage ReturnProduct documents via CRUD and workflow actions.
 
-    model = ReturnProduct
-    lookup_field = 'id'
-    ordering_fields = '-create__date'
+    Features:
+        - Full CRUD operations with role-based permissions.
+        - Custom workflow actions (verify)
+        - Swagger documentation for all operations.
+    """
 
-    serializer_class = {
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        'GET': ReturnProductSerializer,
-        'POST': ReturnProductSerializerPOST,
-        'PATCH': ReturnProductSerializer,
-        'PERFORM_ACTION': {}
+        # MongoEngine document model
+        self.model = ReturnProduct
 
-    }
+        # Field used for retrieving a single object
+        self.lookup_field = 'id'
 
-    allowed_roles = {
+        # Default ordering applied to queryset
+        self.ordering_fields = '-create__date'
 
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
+        # Serializers per HTTP method
+        self.serializer_class = {
+            'GET': ReturnProductSerializer,
+            'POST': ReturnProductSerializerPOST,
+            'PATCH': ReturnProductSerializer,
+            'PERFORM_ACTION': {},
+        }
 
-    }
+        # Role-based access control
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+            'PERFORM_ACTION': ['admin'],
+        }
+
+        self.elasticsearch_index_name = 'return_product'
+        self.elasticsearch_fields = [
+            "product_name",
+            "quantity",
+            "status",
+        ]
 
     def get_queryset(self):
+        """
+        Fetch all ReturnProduct documents.
+
+        Returns:
+            QuerySet: All ReturnProduct objects.
+        """
         return ReturnProduct.objects()
 
     def action_verify(self, request, slug=None):
-
+        """
+        Verify the return product.
+        """
         return handle_verify(
-            request=request,
-            slug=slug,
-            lookup_field=getattr(self, 'lookup_field', 'id')
+            request=request, slug=slug, lookup_field=getattr(self, 'lookup_field', 'id')
         )
