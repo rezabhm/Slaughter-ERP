@@ -2,8 +2,8 @@ from django.utils.decorators import method_decorator
 
 from apps.planning.documents import PlanningSeriesCell
 from apps.planning.serializers import PlanningSeriesCellSerializerPOST, PlanningSeriesCellSerializer
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator
 
 
 @method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesCellSerializerPOST, method='bulk_post', many=True))

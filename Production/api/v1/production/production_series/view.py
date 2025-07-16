@@ -5,8 +5,8 @@ from api.v1.production.production_series.utils import *
 from apps.production.documents import ProductionSeries
 from apps.production.serializers.production_series_serializer import ProductionSeriesSerializer, \
     ProductionSeriesSerializerPOST
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
 @method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=ProductionSeriesSerializerPOST, method='bulk_post', many=True))

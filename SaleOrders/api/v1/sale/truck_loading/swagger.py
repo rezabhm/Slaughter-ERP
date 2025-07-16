@@ -1,5 +1,5 @@
 from apps.sale.documents import TruckLoading
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 class TruckLoadingSwagger(CustomSerializer):
     class Meta:

@@ -7,8 +7,8 @@ from api.v1.production.import_product.utils import handle_steps, handle_status, 
 from apps.production.documents import ImportProduct, ImportProductFromWareHouse
 from apps.production.serializers.import_product_serializer import ImportProductSerializer, ImportProductSerializerPOST, \
     ImportProductFromWareHouseSerializer, ImportProductFromWareHouseSerializerPOST
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
 @method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=ImportProductSerializerPOST, method='bulk_post', many=True))

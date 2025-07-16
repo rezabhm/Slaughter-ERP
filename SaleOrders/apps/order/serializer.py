@@ -1,5 +1,5 @@
 from apps.order.documents import Order, OrderItem
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 from rest_framework import serializers
 
 class OrderSerializer(CustomSerializer):

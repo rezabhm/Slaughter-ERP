@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
 from apps.production.documents import ProductionSeries
-from utils.custom_serializer import CustomSerializer
-from utils.mongo_serializer import MongoSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class ProductionSeriesSerializer(CustomSerializer):

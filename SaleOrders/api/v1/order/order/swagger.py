@@ -1,6 +1,6 @@
 from apps.core.documents import CheckStatus
 from apps.order.documents import Order
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class OrderSwagger(CustomSerializer):

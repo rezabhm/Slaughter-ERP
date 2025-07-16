@@ -8,7 +8,7 @@ from api.v1.production.export_product.view import ExportProductAPIView
 from api.v1.production.import_product.view import ImportProductByCarAPIView, ImportProductFromWareHouseAPIView
 from api.v1.production.production_series.view import ProductionSeriesAPIView
 from api.v1.production.return_product.view import ReturnProductAPIView
-from utils.CustomRouter import CustomRouter
+from utils.CustomRouter.CustomRouter import CustomRouter
 
 default_router = CustomRouter()
 

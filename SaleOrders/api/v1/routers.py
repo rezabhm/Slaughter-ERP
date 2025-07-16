@@ -3,7 +3,7 @@ from api.v1.order.order_item.view import OrderItemAPIView
 from api.v1.sale.loaded_product.view import LoadedProductAPIView
 from api.v1.sale.loaded_product_items.view import LoadedProductItemAPIView
 from api.v1.sale.truck_loading.view import TruckLoadingAPIView
-from utils.CustomRouter import CustomRouter
+from utils.CustomRouter.CustomRouter import CustomRouter
 
 router = CustomRouter()
 

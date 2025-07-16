@@ -5,8 +5,8 @@ from api.v1.planning.planning_series.swagger import FinishedSwaggerSerializer
 from api.v1.planning.planning_series.utils import handle_finished
 from apps.planning.documents import PlanningSeries
 from apps.planning.serializers import PlanningSeriesSerializerPOST, PlanningSeriesSerializer
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
 @method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesSerializerPOST, method='bulk_post', many=True))

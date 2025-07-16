@@ -1,5 +1,5 @@
 from apps.production.documents import ReturnProduct
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class VerifyReturnProductSwagger(CustomSerializer):
