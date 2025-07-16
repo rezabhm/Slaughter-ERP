@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.poultry_cutting_production.documents import PoultryCuttingReturnProduct
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class VerifySwaggerSerializer(CustomSerializer):

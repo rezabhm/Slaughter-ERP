@@ -1,7 +1,7 @@
 from api.v1.warehouse.Inventory.view import InventoryAPIView
 from api.v1.warehouse.transaction.view import TransactionAPIView
 from api.v1.warehouse.warehouse.view import WarehouseAPIView
-from utils.CustomRouter import CustomRouter
+from utils.CustomRouter.CustomRouter import CustomRouter
 
 router = CustomRouter()
 

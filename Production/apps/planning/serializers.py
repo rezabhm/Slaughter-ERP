@@ -1,5 +1,5 @@
 from apps.planning.documents import PlanningSeries, PlanningSeriesCell
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class PlanningSeriesSerializer(CustomSerializer):

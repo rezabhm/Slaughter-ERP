@@ -1,5 +1,5 @@
 from apps.production.documents import ExportProduct
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class VerifySwagger(CustomSerializer):

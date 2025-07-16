@@ -6,8 +6,8 @@ from api.v1.poultry_cutting_production.return_product.utils import handle_verify
 from apps.poultry_cutting_production.documents import PoultryCuttingReturnProduct
 from apps.poultry_cutting_production.serializers.poultry_cutting_return_product_serializer import \
     PoultryCuttingReturnProductSerializer, PoultryCuttingReturnProductSerializerPOST
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
 @method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=PoultryCuttingReturnProductSerializerPOST, method='bulk_post', many=True))

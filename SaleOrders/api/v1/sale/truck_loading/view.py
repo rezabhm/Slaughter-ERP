@@ -3,8 +3,8 @@ from api.v1.sale.truck_loading.conf import http_200, http_404
 from api.v1.sale.truck_loading.swagger import FirstWeightingSwagger, LastWeightingSwagger, ExitSwagger, CancelSwagger
 from apps.sale.documents import TruckLoading
 from apps.sale.serializer import TruckLoadingSerializer, TruckLoadingSerializerPOST, FirstWeightingSerializer, LastWeightingSerializer, ExitSerializer, CancelSerializer
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 from api.v1.sale.truck_loading.utils import handle_first_weighting, handle_last_weighting, handle_exit, handle_cancel
 
 

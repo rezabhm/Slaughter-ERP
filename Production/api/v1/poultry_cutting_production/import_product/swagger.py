@@ -1,5 +1,5 @@
 from apps.poultry_cutting_production.documents import PoultryCuttingImportProduct
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class StatusSwaggerSerializer(CustomSerializer):

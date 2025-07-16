@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.production.documents import ImportProduct, SecondStepImportCar, FifthStepImportCar, SeventhStepImportCar, \
     ImportProductFromWareHouse
-from utils.custom_serializer import CustomSerializer
+from utils.CustomSerializer.custom_serializer import CustomSerializer
 
 
 class IsStatusSwaggerSerializer(CustomSerializer):

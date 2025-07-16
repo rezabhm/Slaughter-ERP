@@ -3,8 +3,8 @@ from api.v1.order.order.conf import http_200, http_404
 from api.v1.order.order.swagger import AttachmentStatusSwagger, VerifiedSwagger, CancelledSwagger
 from apps.order.documents import Order
 from apps.order.serializer import OrderSerializer, OrderSerializerPOST, AttachmentStatusSerializer, VerifiedSerializer, CancelledSerializer
-from utils.custom_api_view import CustomAPIView
-from utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
+from utils.CustomAPIView.api_view import CustomAPIView
+from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 from api.v1.order.order.utils import handle_attachment_status, handle_verified, handle_cancelled
 
 @method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=OrderSerializerPOST, method='bulk_post', many=True))
