@@ -5,7 +5,7 @@ from django.conf import settings
 if getattr(settings, 'CELERY_USE', False):
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'configs.settings.dev')
 
-    app = Celery("BuyOrders")
+    app = Celery("Production")
 
     # Read settings from settings.py
     app.config_from_object("django.conf:settings", namespace="CELERY")
