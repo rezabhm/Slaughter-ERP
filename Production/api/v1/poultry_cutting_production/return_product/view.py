@@ -1,51 +1,96 @@
 from django.utils.decorators import method_decorator
 
-from api.v1.poultry_cutting_production.return_product.conf import status_dict
-from api.v1.poultry_cutting_production.return_product.swagger import VerifySwaggerSerializer
+from api.v1.poultry_cutting_production.return_product.swagger_decorator import (
+    bulk_post_request_decorator,
+    single_post_request_decorator,
+    bulk_patch_request_decorator,
+    single_patch_request_decorator,
+    bulk_get_decorator,
+    single_get_decorator,
+    bulk_delete_request_decorator,
+    single_delete_request_decorator,
+    action_verify_decorator,
+)
 from api.v1.poultry_cutting_production.return_product.utils import handle_verify
 from apps.poultry_cutting_production.documents import PoultryCuttingReturnProduct
-from apps.poultry_cutting_production.serializers.poultry_cutting_return_product_serializer import \
-    PoultryCuttingReturnProductSerializer, PoultryCuttingReturnProductSerializerPOST
+from apps.poultry_cutting_production.serializers.poultry_cutting_return_product_serializer import (
+    PoultryCuttingReturnProductSerializer,
+    PoultryCuttingReturnProductSerializerPOST,
+)
 from utils.CustomAPIView.api_view import CustomAPIView
-from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator, action_swagger_documentation
 
 
-@method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=PoultryCuttingReturnProductSerializerPOST, method='bulk_post', many=True))
-@method_decorator(name='single_post_request', decorator=custom_swagger_generator(serializer_class=PoultryCuttingReturnProductSerializerPOST, method='single_post', many=False))
-@method_decorator(name='bulk_patch_request', decorator=custom_swagger_generator(serializer_class=PoultryCuttingReturnProductSerializer, method='bulk_patch', many=True))
-@method_decorator(name='single_patch_request', decorator=custom_swagger_generator(serializer_class=PoultryCuttingReturnProductSerializer, method='single_patch', many=False))
-@method_decorator(name='bulk_get', decorator=custom_swagger_generator(serializer_class=PoultryCuttingReturnProductSerializer, method='bulk_get', many=True))
-@method_decorator(name='single_get', decorator=custom_swagger_generator(serializer_class=PoultryCuttingReturnProductSerializer, method='single_get', many=False))
-@method_decorator(name='bulk_delete_request', decorator=custom_swagger_generator(serializer_class=PoultryCuttingReturnProductSerializer, method='bulk_delete', many=True))
-@method_decorator(name='single_delete_request', decorator=custom_swagger_generator(serializer_class=PoultryCuttingReturnProductSerializer, method='single_delete', many=False))
-@method_decorator(name='action_verify', decorator=action_swagger_documentation(summaries='Verify Poultry Cutting Return Product', action_name='verify', description='Verify the poultry cutting return product, setting verified status and receiver delivery unit verification, with optional is_useful and is_repack parameters.', serializer_class=VerifySwaggerSerializer, res={'200': status_dict['verified']}))
+@method_decorator(name='bulk_post_request', decorator=bulk_post_request_decorator)
+@method_decorator(name='single_post_request', decorator=single_post_request_decorator)
+@method_decorator(name='bulk_patch_request', decorator=bulk_patch_request_decorator)
+@method_decorator(name='single_patch_request', decorator=single_patch_request_decorator)
+@method_decorator(name='bulk_get', decorator=bulk_get_decorator)
+@method_decorator(name='single_get', decorator=single_get_decorator)
+@method_decorator(name='bulk_delete_request', decorator=bulk_delete_request_decorator)
+@method_decorator(name='single_delete_request', decorator=single_delete_request_decorator)
+@method_decorator(name='action_verify', decorator=action_verify_decorator)
 class PoultryCuttingReturnProductAPIView(CustomAPIView):
+    """
+    API view to manage PoultryCuttingReturnProduct documents via CRUD and workflow actions.
 
-    model = PoultryCuttingReturnProduct
-    lookup_field = 'id'
-    ordering_fields = '-create__date'
+    Features:
+        - Full CRUD operations with role-based permissions.
+        - Custom workflow actions (verify)
+        - Swagger documentation for all operations.
+    """
 
-    serializer_class = {
-        'GET': PoultryCuttingReturnProductSerializer,
-        'POST': PoultryCuttingReturnProductSerializerPOST,
-        'PATCH': PoultryCuttingReturnProductSerializer,
-        'PERFORM_ACTION': {}
-    }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    allowed_roles = {
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
-    }
+        # MongoEngine document model
+        self.model = PoultryCuttingReturnProduct
+
+        # Field used for retrieving a single object
+        self.lookup_field = 'id'
+
+        # Default ordering applied to queryset
+        self.ordering_fields = '-create__date'
+
+        # Serializers per HTTP method
+        self.serializer_class = {
+            'GET': PoultryCuttingReturnProductSerializer,
+            'POST': PoultryCuttingReturnProductSerializerPOST,
+            'PATCH': PoultryCuttingReturnProductSerializer,
+            'PERFORM_ACTION': {},
+        }
+
+        # Role-based access control
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+            'PERFORM_ACTION': ['admin'],
+        }
+
+        self.elasticsearch_index_name = 'poultry_cutting_return_product'
+        self.elasticsearch_fields = [
+            "product_name",
+            "quantity",
+            "status",
+        ]
 
     def get_queryset(self):
+        """
+        Fetch all PoultryCuttingReturnProduct documents.
+
+        Returns:
+            QuerySet: All PoultryCuttingReturnProduct objects.
+        """
         return PoultryCuttingReturnProduct.objects()
 
     def action_verify(self, request, slug=None):
+        """
+        Verify the poultry cutting return product.
+        """
         return handle_verify(
             user=request.user_payload['username'],
             slug_id=slug,
             lookup_field=getattr(self, 'lookup_field', 'id'),
-            data=request.data
+            data=request.data,
         )

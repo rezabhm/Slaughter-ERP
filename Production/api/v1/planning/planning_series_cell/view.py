@@ -1,38 +1,75 @@
 from django.utils.decorators import method_decorator
 
+from api.v1.planning.planning_series_cell.swagger_decorator import (
+    bulk_post_request_decorator,
+    single_post_request_decorator,
+    bulk_patch_request_decorator,
+    single_patch_request_decorator,
+    bulk_get_decorator,
+    single_get_decorator,
+    bulk_delete_request_decorator,
+    single_delete_request_decorator,
+)
 from apps.planning.documents import PlanningSeriesCell
-from apps.planning.serializers import PlanningSeriesCellSerializerPOST, PlanningSeriesCellSerializer
+from apps.planning.serializers import PlanningSeriesCellSerializer, PlanningSeriesCellSerializerPOST
 from utils.CustomAPIView.api_view import CustomAPIView
-from utils.swagger_utils.custom_swagger_generator import custom_swagger_generator
 
 
-@method_decorator(name='bulk_post_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesCellSerializerPOST, method='bulk_post', many=True))
-@method_decorator(name='single_post_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesCellSerializerPOST, method='single_post', many=False))
-@method_decorator(name='bulk_patch_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesCellSerializer, method='bulk_patch', many=True))
-@method_decorator(name='single_patch_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesCellSerializer, method='single_patch', many=False))
-@method_decorator(name='bulk_get', decorator=custom_swagger_generator(serializer_class=PlanningSeriesCellSerializer, method='bulk_get', many=True))
-@method_decorator(name='single_get', decorator=custom_swagger_generator(serializer_class=PlanningSeriesCellSerializer, method='single_get', many=False))
-@method_decorator(name='bulk_delete_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesCellSerializer, method='bulk_delete', many=True))
-@method_decorator(name='single_delete_request', decorator=custom_swagger_generator(serializer_class=PlanningSeriesCellSerializer, method='single_delete', many=False))
+@method_decorator(name='bulk_post_request', decorator=bulk_post_request_decorator)
+@method_decorator(name='single_post_request', decorator=single_post_request_decorator)
+@method_decorator(name='bulk_patch_request', decorator=bulk_patch_request_decorator)
+@method_decorator(name='single_patch_request', decorator=single_patch_request_decorator)
+@method_decorator(name='bulk_get', decorator=bulk_get_decorator)
+@method_decorator(name='single_get', decorator=single_get_decorator)
+@method_decorator(name='bulk_delete_request', decorator=bulk_delete_request_decorator)
+@method_decorator(name='single_delete_request', decorator=single_delete_request_decorator)
 class PlanningSeriesCellAPIView(CustomAPIView):
+    """
+    API view to manage PlanningSeriesCell documents via CRUD operations.
 
-    model = PlanningSeriesCell
-    lookup_field = 'id'
-    ordering_fields = ['priority']
+    Features:
+        - Full CRUD operations with role-based permissions.
+        - Swagger documentation for all operations.
+    """
 
-    serializer_class = {
-        'GET': PlanningSeriesCellSerializer,
-        'POST': PlanningSeriesCellSerializerPOST,
-        'PATCH': PlanningSeriesCellSerializer,
-        'PERFORM_ACTION': {}
-    }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    allowed_roles = {
-        'GET': ['admin'],
-        'POST': ['admin'],
-        'PATCH': ['admin'],
-        'DELETE': ['admin'],
-    }
+        # MongoEngine document model
+        self.model = PlanningSeriesCell
+
+        # Field used for retrieving a single object
+        self.lookup_field = 'id'
+
+        # Default ordering applied to queryset
+        self.ordering_fields = ['priority']
+
+        # Serializers per HTTP method
+        self.serializer_class = {
+            'GET': PlanningSeriesCellSerializer,
+            'POST': PlanningSeriesCellSerializerPOST,
+            'PATCH': PlanningSeriesCellSerializer,
+            'PERFORM_ACTION': {}
+        }
+
+        # Role-based access control
+        self.allowed_roles = {
+            'GET': ['admin'],
+            'POST': ['admin'],
+            'PATCH': ['admin'],
+            'DELETE': ['admin'],
+        }
+
+        self.elasticsearch_index_name = 'planning_series_cell'
+        self.elasticsearch_fields = [
+            "product_name",
+        ]
 
     def get_queryset(self):
+        """
+        Fetch all PlanningSeriesCell documents.
+
+        Returns:
+            QuerySet: All PlanningSeriesCell objects.
+        """
         return PlanningSeriesCell.objects()
