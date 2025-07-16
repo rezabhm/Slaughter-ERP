@@ -16,9 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
+from graphene_django.views import GraphQLView
 from rest_framework import permissions
+
+from graphql.schema import schema
 
 schema_view = get_schema_view(
 
@@ -43,6 +47,8 @@ urlpatterns = [
     path('api-docs/re-doc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     # API version 1
-    path('api/v1/', include('api.v1.routers'))
+    path('api/v1/', include('api.v1.routers')),
 
+    # GraphQL endpoint
+    path("graph-ql/", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
 ]
