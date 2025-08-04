@@ -1,137 +1,105 @@
-# from django.core.exceptions import ObjectDoesNotExist
-# from rest_framework import serializers
-# 
-# from apps.product.models import Unit, ProductCategory, Product
-# 
-# 
-# class UnitSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Unit
-#         fields = '__all__'
-# 
-#     def to_representation(self, instance):
-#         representation = super().to_representation(instance)
-# 
-#         try:
-#             # ManyToMany relationship: filter products that include this unit
-#             products = Product.objects.filter(unit__in=[instance])
-#             product_serializer = ProductSerializer(data=products, many=True)
-#             product_serializer.is_valid()
-#             representation['products'] = product_serializer.data
-#         except ObjectDoesNotExist:
-#             representation['products'] = []
-# 
-#         return representation
-# 
-# 
-# class ProductCategorySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ProductCategory
-#         fields = '__all__'
-# 
-#     def to_representation(self, instance):
-#         representation = super().to_representation(instance)
-# 
-#         # Get all products connected to this category
-#         try:
-#             products = Product.objects.filter(category=instance)
-#             product_serializer = ProductSerializer(data=products, many=True)
-#             product_serializer.is_valid()
-#             representation['products'] = product_serializer.data
-#         except ObjectDoesNotExist:
-#             representation['products'] = []
-# 
-#         return representation
-# 
-# 
-# class ProductSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Product
-#         fields = '__all__'
-# 
-#     def to_representation(self, instance):
-#         representation = super().to_representation(instance)
-# 
-#         # Handle Product Category (FK)
-#         try:
-#             category = ProductCategory.objects.get(pk=representation['category'])
-#             category_serializer = ProductCategorySerializer(data=[category], many=True)
-#             category_serializer.is_valid()
-#             representation['category'] = category_serializer.data[0]
-#         except ObjectDoesNotExist:
-#             representation['category'] = {}
-# 
-#         # Handle Units (M2M)
-#         unit_ids = representation['unit']
-#         units = []
-#         for unit_id in unit_ids:
-#             try:
-#                 unit = Unit.objects.get(pk=unit_id)
-#                 units.append(unit)
-#             except ObjectDoesNotExist:
-#                 pass
-# 
-#         unit_serializer = UnitSerializer(data=units, many=True)
-#         unit_serializer.is_valid()
-#         representation['unit'] = unit_serializer.data
-# 
-#         return representation
-from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+
 from apps.product.models import Unit, ProductCategory, Product
 
 
 class UnitSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Unit model.
+    """
     class Meta:
         model = Unit
         fields = ['id', 'name', 'slug']
+        read_only_fields = ['slug']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        # محصولات را فقط در صورت نیاز و با سریالایزر جداگانه سریال کنید
-        return representation
+    def validate_name(self, value):
+        """Ensure unit name is not empty and unique."""
+        if not value.strip():
+            raise serializers.ValidationError(_("Unit name cannot be empty."))
+        if Unit.objects.filter(name=value).exclude(pk=self.instance.pk if self.instance else None).exists():
+            raise serializers.ValidationError(_("Unit name must be unique."))
+        return value
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the ProductCategory model.
+    """
     class Meta:
         model = ProductCategory
         fields = ['id', 'name', 'slug']
+        read_only_fields = ['slug']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        # محصولات را فقط در صورت نیاز و با سریالایزر جداگانه سریال کنید
-        return representation
+    def validate_name(self, value):
+        """Ensure category name is not empty and unique."""
+        if not value.strip():
+            raise serializers.ValidationError(_("Category name cannot be empty."))
+        if ProductCategory.objects.filter(name=value).exclude(pk=self.instance.pk if self.instance else None).exists():
+            raise serializers.ValidationError(_("Category name must be unique."))
+        return value
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Product model, including nested category and unit details.
+    """
     category = ProductCategorySerializer(read_only=True)
-    unit = UnitSerializer(many=True, read_only=True)
+    units = UnitSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'code', 'category', 'unit', 'slug']
+        fields = ['id', 'name', 'code', 'category', 'units', 'slug']
+        read_only_fields = ['slug']
+
+    def validate_name(self, value):
+        """Ensure product name is not empty."""
+        if not value.strip():
+            raise serializers.ValidationError(_("Product name cannot be empty."))
+        return value
+
+    def validate_code(self, value):
+        """Ensure product code is not empty and unique."""
+        if not value.strip():
+            raise serializers.ValidationError(_("Product code cannot be empty."))
+        if Product.objects.filter(code=value).exclude(pk=self.instance.pk if self.instance else None).exists():
+            raise serializers.ValidationError(_("Product code must be unique."))
+        return value
 
 
-# سریالایزرهای اضافی برای نمایش محصولات در دسته‌بندی یا واحد
 class ProductCategoryWithProductsSerializer(serializers.ModelSerializer):
+    """
+    Serializer for ProductCategory with a limited set of related products.
+    """
     products = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductCategory
         fields = ['id', 'name', 'slug', 'products']
+        read_only_fields = ['slug']
 
     def get_products(self, obj):
-        products = Product.objects.filter(category=obj)[:5]  # محدود کردن تعداد محصولات
+        """
+        Retrieve up to 5 related products for the category.
+        """
+        products = Product.objects.filter(category=obj).select_related('category')[:5]
         return ProductSerializer(products, many=True, read_only=True).data
 
 
 class UnitWithProductsSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Unit with a limited set of related products.
+    """
     products = serializers.SerializerMethodField()
 
     class Meta:
         model = Unit
         fields = ['id', 'name', 'slug', 'products']
+        read_only_fields = ['slug']
 
     def get_products(self, obj):
-        products = Product.objects.filter(unit=obj)[:5]  # محدود کردن تعداد محصولات
+        """
+        Retrieve up to 5 related products for the unit.
+        """
+        products = Product.objects.filter(units=obj).select_related('category')[:5]
         return ProductSerializer(products, many=True, read_only=True).data

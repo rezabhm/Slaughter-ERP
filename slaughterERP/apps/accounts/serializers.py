@@ -1,72 +1,71 @@
 from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
 
-from apps.accounts.models import *
+from apps.accounts.models import CustomUser, Role, Contact
 from apps.product.serializers import UnitSerializer
 
 
-class CustomUserSerializers(serializers.ModelSerializer):
-
-    class Meta:
-        model = CustomUser
-        fields = ['username', 'first_name', 'last_name', 'email', 'role', 'id']
-
-    def to_representation(self, instance):
-
-        representation = super().to_representation(instance)
-        role_list = []
-
-        for role_id in representation['role']:
-
-            role = Role.objects.get(id=role_id)
-            role_serializer = RoleSerializers(data=[role], many=True)
-            role_serializer.is_valid()
-
-            role_list.append(role_serializer.data[0])
-
-        representation['role'] = role_list
-
-        return representation
-
-
-class RoleSerializers(serializers.ModelSerializer):
+class RoleSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Role model, including nested unit details.
+    """
+    units = UnitSerializer(many=True, read_only=True)
 
     class Meta:
         model = Role
-        fields = '__all__'
+        fields = ['id', 'role_name', 'role_slug', 'units']
+        read_only_fields = ['role_slug']
 
-    def to_representation(self, instance):
-
-        representation = super().to_representation(instance)
-
-        unit_list = []
-        for unit_id in representation['unit']:
-
-            unit = Unit.objects.get(id=unit_id)
-            unit_serializer = UnitSerializer(data=[unit], many=True)
-            unit_serializer.is_valid()
-            unit_list.append(unit_serializer.data[0])
-
-        representation['unit'] = unit_list
-        return representation
+    def validate_role_name(self, value):
+        """Ensure role_name is not empty and unique."""
+        if not value.strip():
+            raise serializers.ValidationError(_("Role name cannot be empty."))
+        if Role.objects.filter(role_name=value).exclude(pk=self.instance.pk if self.instance else None).exists():
+            raise serializers.ValidationError(_("Role name must be unique."))
+        return value
 
 
-class ContactSerializers(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the CustomUser model, including nested role details.
+    """
+    roles = RoleSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'roles']
+        read_only_fields = ['id']
+
+    def validate_username(self, value):
+        """Ensure username is not empty and unique."""
+        if not value.strip():
+            raise serializers.ValidationError(_("Username cannot be empty."))
+        if CustomUser.objects.filter(username=value).exclude(pk=self.instance.pk if self.instance else None).exists():
+            raise serializers.ValidationError(_("Username must be unique."))
+        return value
+
+    def validate_email(self, value):
+        """Ensure email is unique if provided."""
+        if value and CustomUser.objects.filter(email=value).exclude(pk=self.instance.pk if self.instance else None).exists():
+            raise serializers.ValidationError(_("Email must be unique."))
+        return value
+
+
+class ContactSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Contact model, including nested unit details.
+    """
+    units = UnitSerializer(many=True, read_only=True)
 
     class Meta:
         model = Contact
-        fields = '__all__'
+        fields = ['id', 'name', 'slug', 'units']
+        read_only_fields = ['slug']
 
-    def to_representation(self, instance):
-
-        representation = super().to_representation(instance)
-
-        unit_list = []
-        for unit_id in representation['unit']:
-
-            unit = Unit.objects.get(id=unit_id)
-            unit_serializer = UnitSerializer(data=[unit], many=True)
-            unit_serializer.is_valid()
-            unit_list.append(unit_serializer.data[0])
-
-        representation['unit'] = unit_list
-        return representation
+    def validate_name(self, value):
+        """Ensure name is not empty and unique."""
+        if not value.strip():
+            raise serializers.ValidationError(_("Contact name cannot be empty."))
+        if Contact.objects.filter(name=value).exclude(pk=self.instance.pk if self.instance else None).exists():
+            raise serializers.ValidationError(_("Contact name must be unique."))
+        return value
