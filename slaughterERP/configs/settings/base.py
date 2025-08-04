@@ -49,9 +49,10 @@ INSTALLED_APPS = [
     # Third-party apps
     'corsheaders',
     'rest_framework',
-    'drf_yasg',  # Corrected name (underscore, not hyphen)
+    'drf_yasg',
     'rest_framework_simplejwt',
-
+    'django_extensions',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -137,4 +138,5 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',  # Optional: restrict access to authenticated users
     ),
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }

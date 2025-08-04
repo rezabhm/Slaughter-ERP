@@ -1,96 +1,142 @@
 from django.utils.decorators import method_decorator
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import mixins, filters, status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.viewsets import GenericViewSet
-from rest_framework import mixins, filters
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from apps.accounts.models import Role
-from apps.accounts.serializers import RoleSerializers
+from apps.accounts.models import Role, Unit
+from apps.accounts.serializers import RoleSerializer
 from utils.rest_framework_class import BaseAPIView
-
-
-# ------------------------------------------------------
-# Swagger documentation for admin user management API
-# Each method (create, retrieve, update, partial_update, destroy, list)
-# is decorated to describe its behavior clearly in Swagger UI
 
 
 @method_decorator(name='create', decorator=swagger_auto_schema(
     operation_summary='Create a new role',
-    operation_description='Admins can create a new role. This role defines access levels for customers and users.',
+    operation_description='Creates a new role with a unique name and optional unit associations. Only accessible to admin users.',
     tags=['admin.accounts.role'],
-    request_body=RoleSerializers,
+    request_body=RoleSerializer,
+    responses={
+        201: RoleSerializer,
+        400: openapi.Response('Invalid input data.', examples={'application/json': {'detail': 'Invalid data'}}),
+        401: openapi.Response('Unauthorized.', examples={'application/json': {'detail': 'Authentication credentials were not provided.'}}),
+        403: openapi.Response('Permission denied.', examples={'application/json': {'detail': 'You do not have permission to perform this action.'}}),
+    },
 ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(
-    operation_summary='Retrieve role information',
-    operation_description='Admins can retrieve role details using the role\'s ID (primary key).',
+    operation_summary='Retrieve a role',
+    operation_description='Retrieves details of a specific role by its ID. Only accessible to admin users.',
     tags=['admin.accounts.role'],
     manual_parameters=[
         openapi.Parameter(
             'pk',
             openapi.IN_PATH,
             description='Primary key (ID) of the role to retrieve.',
-            type=openapi.TYPE_STRING
-        )
+            type=openapi.TYPE_INTEGER,
+            required=True,
+        ),
     ],
-))
-@method_decorator(name='list', decorator=swagger_auto_schema(
-    operation_summary='List all roles',
-    operation_description='Admins can view a list of all available roles. Supports search by role name.',
-    tags=['admin.accounts.role'],
-    manual_parameters=[
-        openapi.Parameter(
-            'search',
-            openapi.IN_QUERY,
-            description='Search roles by role name.',
-            type=openapi.TYPE_STRING
-        )
-    ],
-    responses={200: RoleSerializers(many=True)}
+    responses={
+        200: RoleSerializer,
+        401: openapi.Response('Unauthorized.', examples={'application/json': {'detail': 'Authentication credentials were not provided.'}}),
+        403: openapi.Response('Permission denied.', examples={'application/json': {'detail': 'You do not have permission to perform this action.'}}),
+        404: openapi.Response('Not found.', examples={'application/json': {'detail': 'Not found.'}}),
+    },
 ))
 @method_decorator(name='update', decorator=swagger_auto_schema(
-    operation_summary='Fully update role',
-    operation_description='Admins can completely update a role\'s information by its ID.',
+    operation_summary='Fully update a role',
+    operation_description='Updates all fields of a role identified by its ID. Only accessible to admin users.',
     tags=['admin.accounts.role'],
     manual_parameters=[
         openapi.Parameter(
             'pk',
             openapi.IN_PATH,
             description='Primary key (ID) of the role to update.',
-            type=openapi.TYPE_STRING
-        )
+            type=openapi.TYPE_INTEGER,
+            required=True,
+        ),
     ],
-    request_body=RoleSerializers,
+    request_body=RoleSerializer,
+    responses={
+        200: RoleSerializer,
+        400: openapi.Response('Invalid input data.', examples={'application/json': {'detail': 'Invalid data'}}),
+        401: openapi.Response('Unauthorized.', examples={'application/json': {'detail': 'Authentication credentials were not provided.'}}),
+        403: openapi.Response('Permission denied.', examples={'application/json': {'detail': 'You do not have permission to perform this action.'}}),
+        404: openapi.Response('Not found.', examples={'application/json': {'detail': 'Not found.'}}),
+    },
 ))
 @method_decorator(name='partial_update', decorator=swagger_auto_schema(
-    operation_summary='Partially update role',
-    operation_description='Admins can partially update specific fields of a role by its ID.',
+    operation_summary='Partially update a role',
+    operation_description='Updates specific fields of a role identified by its ID. Only accessible to admin users.',
     tags=['admin.accounts.role'],
     manual_parameters=[
         openapi.Parameter(
             'pk',
             openapi.IN_PATH,
             description='Primary key (ID) of the role to partially update.',
-            type=openapi.TYPE_STRING
-        )
+            type=openapi.TYPE_INTEGER,
+            required=True,
+        ),
     ],
-    request_body=RoleSerializers,
+    request_body=RoleSerializer,
+    responses={
+        200: RoleSerializer,
+        400: openapi.Response('Invalid input data.', examples={'application/json': {'detail': 'Invalid data'}}),
+        401: openapi.Response('Unauthorized.', examples={'application/json': {'detail': 'Authentication credentials were not provided.'}}),
+        403: openapi.Response('Permission denied.', examples={'application/json': {'detail': 'You do not have permission to perform this action.'}}),
+        404: openapi.Response('Not found.', examples={'application/json': {'detail': 'Not found.'}}),
+    },
 ))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(
     operation_summary='Delete a role',
-    operation_description='Admins can delete a role by providing its ID.',
+    operation_description='Deletes a role by its ID. Only accessible to admin users.',
     tags=['admin.accounts.role'],
     manual_parameters=[
         openapi.Parameter(
             'pk',
             openapi.IN_PATH,
             description='Primary key (ID) of the role to delete.',
-            type=openapi.TYPE_STRING
-        )
+            type=openapi.TYPE_INTEGER,
+            required=True,
+        ),
     ],
-    responses={204: 'Role successfully deleted.'}
+    responses={
+        204: openapi.Response('Role successfully deleted.'),
+        401: openapi.Response('Unauthorized.', examples={'application/json': {'detail': 'Authentication credentials were not provided.'}}),
+        403: openapi.Response('Permission denied.', examples={'application/json': {'detail': 'You do not have permission to perform this action.'}}),
+        404: openapi.Response('Not found.', examples={'application/json': {'detail': 'Not found.'}}),
+    },
+))
+@method_decorator(name='list', decorator=swagger_auto_schema(
+    operation_summary='List all roles',
+    operation_description='Retrieves a list of all roles with optional filtering and searching by role name or units. Only accessible to admin users.',
+    tags=['admin.accounts.role'],
+    manual_parameters=[
+        openapi.Parameter(
+            'search',
+            openapi.IN_QUERY,
+            description='Search roles by role name.',
+            type=openapi.TYPE_STRING,
+        ),
+        openapi.Parameter(
+            'role_name',
+            openapi.IN_QUERY,
+            description='Filter roles by exact role name.',
+            type=openapi.TYPE_STRING,
+        ),
+        openapi.Parameter(
+            'units',
+            openapi.IN_QUERY,
+            description='Filter roles by unit IDs (comma-separated).',
+            type=openapi.TYPE_STRING,
+        ),
+    ],
+    responses={
+        200: RoleSerializer(many=True),
+        401: openapi.Response('Unauthorized.', examples={'application/json': {'detail': 'Authentication credentials were not provided.'}}),
+        403: openapi.Response('Permission denied.', examples={'application/json': {'detail': 'You do not have permission to perform this action.'}}),
+    },
 ))
 class AdminRoleAPIView(
     BaseAPIView,
@@ -102,21 +148,17 @@ class AdminRoleAPIView(
     mixins.ListModelMixin,
 ):
     """
-    Admin-only API ViewSet for managing user roles.
-
-    Features:
-    - Create: Admin can create a new role.
-    - Retrieve: Admin can view role details.
-    - Update: Admin can fully or partially update a role.
-    - Delete: Admin can delete a role.
-    - List: Admin can view all roles and search by role name.
+    API ViewSet for admin-only role management.
+    Supports CRUD operations, filtering, and searching for roles.
     """
-
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
-    queryset = Role.objects.all()
-    serializer_class = RoleSerializers
-
-    # Enable search functionality on roles
-    filter_backends = [filters.SearchFilter]
+    serializer_class = RoleSerializer
+    queryset = Role.objects.select_related().prefetch_related('units')
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    filterset_fields = ['role_name', 'units']
     search_fields = ['role_name']
+
+    def get_queryset(self):
+        """Optimize queryset to reduce database queries."""
+        return super().get_queryset().prefetch_related('units')
