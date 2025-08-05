@@ -4,7 +4,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, filters, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -286,7 +286,7 @@ class AgricultureAPIView(
     Supports creating, retrieving, and listing agriculture entities with filtering and searching.
     """
     authentication_classes = [JWTAuthentication]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = AgricultureSerializer
     lookup_field = 'slug'
     queryset = Agriculture.objects.select_related('city')

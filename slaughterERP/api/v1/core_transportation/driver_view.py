@@ -4,7 +4,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, filters, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -135,9 +135,9 @@ from utils.rest_framework_class import BaseAPIView
         403: openapi.Response('Permission denied.', examples={'application/json': {'detail': 'You do not have permission to perform this action.'}}),
     },
 ))
-@method_decorator(name='change_contact', decorator=swagger_auto_schema(
-    operation_summary='Change contact for a driver',
-    operation_description='Updates the contact association for a driver identified by their slug. Expects a contact ID. Only accessible to admin users.',
+@method_decorator(name='add_contact', decorator=swagger_auto_schema(
+    operation_summary='add contact for a driver',
+    operation_description='add the contact association for a driver identified by their slug. Expects a contacts list ID. Only accessible to admin users.',
     tags=['admin.core.transportation.driver'],
     manual_parameters=[
         openapi.Parameter(
@@ -151,12 +151,12 @@ from utils.rest_framework_class import BaseAPIView
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
-            'contact_id': openapi.Schema(
+            'contacts': openapi.Schema(
                 type=openapi.TYPE_INTEGER,
                 description='ID of the contact to associate with the driver.',
             ),
         },
-        required=['contact_id'],
+        required=['contacts'],
     ),
     responses={
         200: DriverSerializer,
@@ -193,24 +193,25 @@ class DriverAdminAPIView(
         return super().get_queryset().select_related('contact')
 
     @action(detail=True, methods=['post'])
-    def change_contact(self, request, slug=None):
+    def add_contact(self, request, slug=None):
         """
-        Update the contact association for a driver.
+        Add new contacts association for a driver.
         """
         driver = self.get_object()
-        contact_id = request.data.get('contact_id')
+        contacts = request.data.get('contacts')
 
-        if not contact_id:
-            return Response({'detail': 'Contact ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not contacts:
+            return Response({'detail': 'Contacts list is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            contact = Contact.objects.get(id=contact_id)
-            driver.contact = contact
+            contacts = [Contact.objects.get(id=contact_id) for contact_id in contacts]
+            for contact in contacts:
+                driver.contacts.add(contact)
             driver.save()
             serializer = self.get_serializer(driver)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Contact.DoesNotExist:
-            return Response({'detail': 'Contact not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Contacts not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @method_decorator(name='create', decorator=swagger_auto_schema(
@@ -275,7 +276,7 @@ class DriverAPIView(
     Supports creating, retrieving, and listing drivers with filtering and searching.
     """
     authentication_classes = [JWTAuthentication]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = DriverSerializer
     lookup_field = 'slug'
     queryset = Driver.objects.select_related('contact')

@@ -8,16 +8,11 @@ from apps.product.serializers import ProductCategorySerializer
 
 
 class CitySerializer(serializers.ModelSerializer):
-    """
-    Serializer for the City model.
-    """
     class Meta:
         model = City
         fields = ['id', 'name', 'car_code', 'slug']
-        read_only_fields = ['slug']
 
     def validate_name(self, value):
-        """Ensure city name is not empty and unique."""
         if not value.strip():
             raise serializers.ValidationError(_("City name cannot be empty."))
         if City.objects.filter(name=value).exclude(pk=self.instance.pk if self.instance else None).exists():
@@ -25,61 +20,59 @@ class CitySerializer(serializers.ModelSerializer):
         return value
 
     def validate_car_code(self, value):
-        """Ensure car code is non-negative."""
         if value < 0:
             raise serializers.ValidationError(_("Car code cannot be negative."))
         return value
 
 
 class AgricultureSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Agriculture model, including nested city details.
-    """
-    city = CitySerializer(read_only=True)
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
 
     class Meta:
         model = Agriculture
         fields = ['id', 'name', 'city', 'slug']
-        read_only_fields = ['slug']
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['city'] = CitySerializer(instance.city).data if instance.city else None
+        return rep
 
     def validate_name(self, value):
-        """Ensure agriculture name is not empty."""
         if not value.strip():
             raise serializers.ValidationError(_("Agriculture name cannot be empty."))
         return value
 
 
 class ProductOwnerSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the ProductOwner model, including nested contact details.
-    """
-    contact = ContactSerializer(read_only=True)
+    contact = serializers.PrimaryKeyRelatedField(queryset=ContactSerializer.Meta.model.objects.all())
 
     class Meta:
         model = ProductOwner
         fields = ['id', 'contact', 'slug']
-        read_only_fields = ['slug']
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['contact'] = ContactSerializer(instance.contact).data if instance.contact else None
+        return rep
 
 
 class DriverSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Driver model, including nested contact details.
-    """
-    contacts = ContactSerializer(many=True, read_only=True)
+    contact = serializers.PrimaryKeyRelatedField(queryset=ContactSerializer.Meta.model.objects.all())
 
     class Meta:
         model = Driver
-        fields = ['id', 'contacts', 'slug']
-        read_only_fields = ['slug']
+        fields = ['id', 'contact', 'slug']
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['contact'] = ContactSerializer(instance.contact).data if instance.contact else None
+        return rep
 
 
 class CarSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Car model, including nested city, product category, and driver details.
-    """
-    city_code = CitySerializer(read_only=True)
-    product_category = ProductCategorySerializer(read_only=True)
-    driver = DriverSerializer(read_only=True)
+    city_code = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
+    product_category = serializers.PrimaryKeyRelatedField(queryset=ProductCategorySerializer.Meta.model.objects.all())
+    driver = serializers.PrimaryKeyRelatedField(queryset=Driver.objects.all())
 
     class Meta:
         model = Car
@@ -87,10 +80,15 @@ class CarSerializer(serializers.ModelSerializer):
             'id', 'prefix_number', 'alphabet', 'postfix_number', 'city_code',
             'has_refrigerator', 'product_category', 'slug', 'repetitive', 'driver'
         ]
-        read_only_fields = ['slug']
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['city_code'] = CitySerializer(instance.city_code).data if instance.city_code else None
+        rep['product_category'] = ProductCategorySerializer(instance.product_category).data if instance.product_category else None
+        rep['driver'] = DriverSerializer(instance.driver).data if instance.driver else None
+        return rep
 
     def validate(self, data):
-        """Validate car data."""
         if data.get('prefix_number', 0) < 0 or data.get('postfix_number', 0) < 0:
             raise serializers.ValidationError(_("License plate numbers cannot be negative."))
         if not data.get('alphabet', '').strip():

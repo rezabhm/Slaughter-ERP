@@ -11,10 +11,8 @@ class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unit
         fields = ['id', 'name', 'slug']
-        read_only_fields = ['slug']
 
     def validate_name(self, value):
-        """Ensure unit name is not empty and unique."""
         if not value.strip():
             raise serializers.ValidationError(_("Unit name cannot be empty."))
         if Unit.objects.filter(name=value).exclude(pk=self.instance.pk if self.instance else None).exists():
@@ -29,10 +27,8 @@ class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = ['id', 'name', 'slug']
-        read_only_fields = ['slug']
 
     def validate_name(self, value):
-        """Ensure category name is not empty and unique."""
         if not value.strip():
             raise serializers.ValidationError(_("Category name cannot be empty."))
         if ProductCategory.objects.filter(name=value).exclude(pk=self.instance.pk if self.instance else None).exists():
@@ -42,24 +38,21 @@ class ProductCategorySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     """
-    Serializer for the Product model, including nested category and unit details.
+    Serializer for the Product model using category and unit IDs instead of nested objects.
     """
-    category = ProductCategorySerializer(read_only=True)
-    units = UnitSerializer(many=True, read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=ProductCategory.objects.all())
+    units = serializers.PrimaryKeyRelatedField(queryset=Unit.objects.all(), many=True)
 
     class Meta:
         model = Product
         fields = ['id', 'name', 'code', 'category', 'units', 'slug']
-        read_only_fields = ['slug']
 
     def validate_name(self, value):
-        """Ensure product name is not empty."""
         if not value.strip():
             raise serializers.ValidationError(_("Product name cannot be empty."))
         return value
 
     def validate_code(self, value):
-        """Ensure product code is not empty and unique."""
         if not value.strip():
             raise serializers.ValidationError(_("Product code cannot be empty."))
         if Product.objects.filter(code=value).exclude(pk=self.instance.pk if self.instance else None).exists():
@@ -69,37 +62,29 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ProductCategoryWithProductsSerializer(serializers.ModelSerializer):
     """
-    Serializer for ProductCategory with a limited set of related products.
+    Serializer for ProductCategory with limited products listed by nested serializer.
     """
     products = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductCategory
         fields = ['id', 'name', 'slug', 'products']
-        read_only_fields = ['slug']
 
     def get_products(self, obj):
-        """
-        Retrieve up to 5 related products for the category.
-        """
         products = Product.objects.filter(category=obj).select_related('category')[:5]
         return ProductSerializer(products, many=True, read_only=True).data
 
 
 class UnitWithProductsSerializer(serializers.ModelSerializer):
     """
-    Serializer for Unit with a limited set of related products.
+    Serializer for Unit with limited products listed by nested serializer.
     """
     products = serializers.SerializerMethodField()
 
     class Meta:
         model = Unit
         fields = ['id', 'name', 'slug', 'products']
-        read_only_fields = ['slug']
 
     def get_products(self, obj):
-        """
-        Retrieve up to 5 related products for the unit.
-        """
         products = Product.objects.filter(units=obj).select_related('category')[:5]
         return ProductSerializer(products, many=True, read_only=True).data

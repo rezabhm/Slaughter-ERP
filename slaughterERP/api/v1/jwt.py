@@ -1,54 +1,9 @@
 from django.conf import settings
-from django.utils.decorators import method_decorator
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
-@method_decorator(name='post', decorator=swagger_auto_schema(
-    operation_summary='Obtain JWT token pair',
-    operation_description='Authenticates a user and returns a JWT access and refresh token pair stored in HttpOnly cookies. '
-                         'Returns user details in the response body.',
-    tags=['auth'],
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username of the user'),
-            'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password of the user'),
-        },
-        required=['username', 'password'],
-    ),
-    responses={
-        200: openapi.Response(
-            description='Successful authentication',
-            examples={
-                'application/json': {
-                    'user_id': 1,
-                    'username': 'example_user',
-                    'email': 'user@example.com',
-                    'first_name': 'John',
-                    'last_name': 'Doe',
-                    'roles': [
-                        {
-                            'role_name': 'Admin',
-                            'role': 'admin',
-                            'units': [
-                                {'name': 'Unit A', 'slug': 'unit-a'},
-                                {'name': 'Unit B', 'slug': 'unit-b'}
-                            ]
-                        }
-                    ],
-                    'is_admin': True
-                }
-            }
-        ),
-        400: openapi.Response('Invalid input data.', examples={'application/json': {'detail': 'Invalid data'}}),
-        401: openapi.Response('Unauthorized.', examples={'application/json': {'detail': 'Invalid credentials'}}),
-    },
-))
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
     Custom serializer for JWT token pair generation.
@@ -155,26 +110,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         return super().finalize_response(request, response, *args, **kwargs)
 
 
-@method_decorator(name='post', decorator=swagger_auto_schema(
-    operation_summary='Refresh JWT token',
-    operation_description='Refreshes an access token using a refresh token stored in an HttpOnly cookie or provided in the request body. '
-                         'Returns a new access token in an HttpOnly cookie.',
-    tags=['auth'],
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'refresh': openapi.Schema(type=openapi.TYPE_STRING, description='Refresh token (optional if provided in cookie)'),
-        },
-    ),
-    responses={
-        200: openapi.Response(
-            description='Successful token refresh',
-            examples={'application/json': {}}
-        ),
-        400: openapi.Response('Invalid input data.', examples={'application/json': {'detail': 'Invalid refresh token'}}),
-        401: openapi.Response('Unauthorized.', examples={'application/json': {'detail': 'Invalid or expired refresh token'}}),
-    },
-))
 class CustomTokenRefreshView(TokenRefreshView):
     """
     Custom view for refreshing JWT access tokens.

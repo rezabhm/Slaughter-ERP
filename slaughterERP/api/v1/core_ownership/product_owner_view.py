@@ -4,7 +4,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, filters, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -275,10 +275,10 @@ class ProductOwnerAPIView(
     Supports creating, retrieving, and listing product owners with filtering and searching.
     """
     authentication_classes = [JWTAuthentication]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = ProductOwnerSerializer
     lookup_field = 'slug'
-    queryset = ProductOwner.objects.select_related('contact')
+    queryset = ProductOwner.objects.all()
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     filterset_fields = ['contact']
     search_fields = ['contact__name']

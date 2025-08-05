@@ -158,6 +158,7 @@ class AdminRoleAPIView(
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     filterset_fields = ['role_name', 'units']
     search_fields = ['role_name']
+    lookup_field = 'role_slug'
 
     def get_queryset(self):
         """Optimize queryset to reduce database queries."""

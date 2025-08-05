@@ -1,9 +1,12 @@
+from django.db.models import ProtectedError
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from requests import Response
 from rest_framework import mixins, filters, status
-from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -164,6 +167,21 @@ class ProductCategoryAdminAPIView(
         """Optimize queryset to reduce database queries."""
         return super().get_queryset().prefetch_related('products', 'cars')
 
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override destroy to catch ProtectedError and return meaningful message
+        when the category is referenced by existing products.
+        """
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+        except ProtectedError as e:
+            # You can customize the message based on your domain
+            return JsonResponse(
+                {"detail": "You cannot delete this category because it is assigned to one or more products."},
+                status=status.HTTP_409_CONFLICT
+            )
+        return JsonResponse(status=status.HTTP_204_NO_CONTENT)
 
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(
     operation_summary='Retrieve a product category',
@@ -222,7 +240,7 @@ class ProductCategoryAPIView(
     Supports retrieving and listing product categories with filtering and searching.
     """
     authentication_classes = [JWTAuthentication]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = ProductCategorySerializer
     lookup_field = 'slug'
     queryset = ProductCategory.objects.all()

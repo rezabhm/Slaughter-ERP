@@ -106,11 +106,10 @@ class DriverAdmin(admin.ModelAdmin):
     Admin configuration for the Driver model.
     Provides efficient management with search, filter, and display options.
     """
-    list_display = ('slug', 'contact_count')
-    list_filter = ('contacts',)
-    search_fields = ('slug', 'contacts__name')
+    list_display = ('slug', 'contact')
+    list_filter = ('contact',)
+    search_fields = ('slug', 'contact__name')
     readonly_fields = ('slug',)
-    filter_horizontal = ('contacts',)
     ordering = ('slug',)
     fieldsets = (
         (None, {
@@ -118,19 +117,14 @@ class DriverAdmin(admin.ModelAdmin):
             'description': _('Core details of the driver.')
         }),
         (_('Associations'), {
-            'fields': ('contacts',),
-            'description': _('Contacts associated with this driver.')
+            'fields': ('contact',),
+            'description': _('Contact associated with this driver.')
         }),
     )
 
-    def contact_count(self, obj):
-        """Display the number of contacts associated with the driver."""
-        return obj.contacts.count()
-    contact_count.short_description = _('Contact Count')
-
     def get_queryset(self, request):
         """Optimize queryset to reduce database queries."""
-        return super().get_queryset(request).prefetch_related('contacts')
+        return super().get_queryset(request).select_related('contact')
 
     def save_model(self, request, obj, form, change):
         """Ensure validation and slug generation on save."""
@@ -172,7 +166,7 @@ class CarAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         """Optimize queryset to reduce database queries."""
-        return super().get_queryset(request).select_related('city_code', 'product_category', 'driver').prefetch_related('driver__contacts')
+        return super().get_queryset(request).select_related('city_code', 'product_category', 'driver').prefetch_related('driver__contact')
 
     def save_model(self, request, obj, form, change):
         """Ensure validation and slug generation on save."""

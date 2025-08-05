@@ -9,21 +9,16 @@ from apps.product.models import ProductCategory
 
 
 class Driver(models.Model):
-    """
-    Represents a driver with associated contacts.
-    Links to Contact model via ManyToMany relationship.
-    """
-    contacts = models.ManyToManyField(
+    contact = models.OneToOneField(
         Contact,
-        blank=True,
-        related_name="drivers",
-        verbose_name=_("Contacts"),
-        help_text=_("Contacts associated with this driver.")
+        on_delete=models.CASCADE,
+        related_name="driver",
+        verbose_name=_("Contact"),
+        help_text=_("The contact associated with this driver.")
     )
     slug = models.SlugField(
         max_length=100,
         unique=True,
-        editable=False,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the driver.")
     )
@@ -37,24 +32,36 @@ class Driver(models.Model):
         ]
 
     def clean(self):
-        """Validate driver data before saving."""
-        if not self.contacts.exists() and not self.slug:
-            raise ValidationError(_("At least one contact is required to generate a slug."))
+        """
+        Validate driver instance before saving.
+        """
+        if not self.contact:
+            raise ValidationError(_("A driver must be associated with a contact."))
         super().clean()
 
     def save(self, *args, **kwargs):
         """
-        Override save to auto-generate slug from the first contact's name if not set.
-        Ensures slug uniqueness and handles validation.
+        Override save to handle slug:
+        - If a slug is provided manually, preserve it if unique; append a counter if not.
+        - If no slug is provided, generate one based on the contact's name.
         """
-        if not self.slug and self.contacts.exists():
-            first_contact = self.contacts.first()
-            self.slug = slugify(first_contact.name)
-            base_slug = self.slug
-            counter = 1
-            while Driver.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
-                self.slug = f"{base_slug}-{counter}"
-                counter += 1
+        # If no slug is provided, generate one from contact's name
+        if not self.slug:
+            if self.contact:
+                base_slug = slugify(self.contact.name)
+            else:
+                base_slug = "driver"
+
+        else:
+            base_slug = self.slug  # Use manually provided slug as base
+
+        self.slug = base_slug
+        # Ensure slug is unique
+        original_slug = self.slug
+        counter = 1
+        while Driver.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+            self.slug = f"{original_slug}-{counter}"
+            counter += 1
 
         self.full_clean()
         super().save(*args, **kwargs)
@@ -75,7 +82,7 @@ class Car(models.Model):
     )
     alphabet = models.CharField(
         max_length=2,
-        default='ط',
+        default='G',
         verbose_name=_("Alphabet"),
         help_text=_("Alphabet part of the license plate.")
     )
@@ -106,7 +113,6 @@ class Car(models.Model):
     slug = models.SlugField(
         max_length=100,
         unique=True,
-        editable=False,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the car.")
     )

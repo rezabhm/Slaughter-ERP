@@ -4,7 +4,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, filters, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -231,14 +231,11 @@ class ProductAdminAPIView(
     permission_classes = [IsAdminUser]
     serializer_class = ProductSerializer
     lookup_field = 'slug'
-    queryset = Product.objects.select_related('category', 'unit')
+    queryset = Product.objects.all()
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'code', 'category', 'unit']
+    filterset_fields = ['name', 'code', 'category', 'units']
     search_fields = ['name', 'code', 'category__name', 'unit__name']
 
-    def get_queryset(self):
-        """Optimize queryset to reduce database queries."""
-        return super().get_queryset().select_related('category', 'unit')
 
     @action(detail=True, methods=['post'])
     def change_category(self, request, slug=None):
@@ -273,7 +270,7 @@ class ProductAdminAPIView(
 
         try:
             unit = Unit.objects.get(id=unit_id)
-            product.unit = unit
+            product.units.add(unit)
             product.save()
             serializer = self.get_serializer(product)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -350,14 +347,10 @@ class ProductAPIView(
     Supports retrieving and listing products with filtering and searching.
     """
     authentication_classes = [JWTAuthentication]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = ProductSerializer
     lookup_field = 'slug'
-    queryset = Product.objects.select_related('category', 'unit')
+    queryset = Product.objects.all()
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['name', 'code', 'category', 'unit']
-    search_fields = ['name', 'code', 'category__name', 'unit__name']
-
-    def get_queryset(self):
-        """Optimize queryset to reduce database queries."""
-        return super().get_queryset().select_related('category', 'unit')
+    filterset_fields = ['name', 'code', 'category', 'units']
+    search_fields = ['name', 'code', 'category__name', 'units__name']
