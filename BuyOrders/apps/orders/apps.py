@@ -25,4 +25,4 @@ class OrdersConfig(AppConfig):
             create_index_payment()
 
             # Register document signals
-            from apps.orders.elasticsearch.signals import *
+            # from apps.orders.elasticsearch.signals import *

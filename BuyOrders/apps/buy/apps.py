@@ -15,4 +15,4 @@ class BuyConfig(AppConfig):
 
         if getattr(settings, 'ELASTICSEARCH_STATUS', False):
             create_index_production_order_document()
-            from apps.buy.elasticsearch.signals import *
+            # from apps.buy.elasticsearch.signals import *

@@ -127,7 +127,7 @@ warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 ELASTICSEARCH_CONNECTION = Elasticsearch(
     ['https://localhost:9200'],
     basic_auth=('elastic', 'PaJ*8-X9YaOD+YyGcBRk'),
-    verify_certs=False  # ⛔ غیرفعال کردن بررسی گواهی SSL
+    verify_certs=False
 )
 ELASTICSEARCH_STATUS = False
 
