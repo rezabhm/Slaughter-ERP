@@ -1,0 +1,47 @@
+- name: slaughterERP
+  path: ./slaughterERP
+  port: 8000
+  apps:
+    - accounts
+    - product
+    - core
+  healthcheck_path: /healthz/
+- name: BuyOrders
+  path: ./BuyOrders
+  port: 8001
+  apps:
+    - core
+    - buy
+    - orders
+  healthcheck_path: /healthz/
+- name: SaleOrders
+  path: ./SaleOrders
+  port: 8002
+  apps:
+    - core
+    - sale
+    - order
+  healthcheck_path: /healthz/
+- name: WarehouseManagement
+  path: ./WarehouseManagement
+  port: 8003
+  apps:
+    - core
+    - warehouse
+  healthcheck_path: /healthz/
+- name: Production
+  path: ./Production
+  port: 8004
+  apps:
+    - production
+    - planning
+    - poultry_cutting_production
+    - core
+  healthcheck_path: /healthz/
+- name: Logs
+  path: ./Logs
+  port: 8005
+  apps:
+    - log
+    - core
+  healthcheck_path: /healthz/
