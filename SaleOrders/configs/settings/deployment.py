@@ -1,134 +1,73 @@
+# configs/settings/deploy_settings.py
+from pathlib import Path
 import os
-import warnings
-from datetime import timedelta
-from urllib3.exceptions import InsecureRequestWarning
-from elasticsearch import Elasticsearch
+from configs.settings.dev import *  # load env-based settings
 
-from configs.settings.base import *
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# Disable debug in production
-DEBUG = False
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
-if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
-    raise RuntimeError("ALLOWED_HOSTS must be set in production environment variables")
+def env_bool(key, default=False):
+    v = os.getenv(key)
+    if v is None:
+        return default
+    return v.lower() in ("1", "true", "yes")
 
-# Database config
-DATABASES = {
-    'default': {
-        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
-    }
-}
+DEBUG = env_bool("DJANGO_DEBUG", False)
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "example.com").split(",") if h.strip()]
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("DJANGO_SECRET_KEY must be set for deployment")
 
-# CORS config
-CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", True)
+SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", True)
+CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", True)
+X_FRAME_OPTIONS = os.getenv("X_FRAME_OPTIONS", "DENY")
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", True)
+SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", True)
 
-def _split_env_list(key, default=''):
-    val = os.environ.get(key, default)
-    if not val:
-        return []
-    return [item.strip() for item in val.split(',') if item.strip()]
+DATABASE_URL = os.getenv("DATABASE_URL", DATABASE_URL)
+if DATABASE_URL:
+    try:
+        import dj_database_url
+        DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=int(os.getenv("DB_CONN_MAX_AGE", "600")))}
+    except Exception:
+        pass
 
-CORS_ALLOWED_ORIGINS = _split_env_list('CORS_ALLOWED_ORIGINS')
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", EMAIL_BACKEND)
+EMAIL_HOST = os.getenv("EMAIL_HOST", EMAIL_HOST)
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", str(EMAIL_PORT)))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", EMAIL_HOST_USER)
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", EMAIL_HOST_PASSWORD)
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", EMAIL_USE_TLS)
 
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "authorization",
-    "content-type",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
-]
+es_hosts = [h.strip() for h in os.getenv("ELASTICSEARCH_HOSTS", ",".join(es_hosts if 'es_hosts' in globals() else ["https://localhost:9200"])).split(",") if h.strip()]
+es_user = os.getenv("ELASTICSEARCH_USER", os.getenv("ELASTICSEARCH_USER", "elastic"))
+es_password = os.getenv("ELASTICSEARCH_PASSWORD", os.getenv("ELASTICSEARCH_PASSWORD", ""))
+es_verify = not env_bool("ELASTICSEARCH_INSECURE_SKIP_VERIFY", False)
 
-CORS_ALLOW_METHODS = [
-    "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
-]
+ELASTICSEARCH_STATUS = env('ELASTICSEARCH_STATUS', 'False') == 'True'
+if ELASTICSEARCH_STATUS:
+    from elasticsearch import Elasticsearch
+    ELASTICSEARCH_CONNECTION = Elasticsearch(es_hosts, basic_auth=(es_user, es_password) if es_user and es_password else None, verify_certs=es_verify)
 
-# Load JWT public key
-JWT_PUBLIC_KEY_PATH = os.environ.get('JWT_PUBLIC_KEY_PATH')
-if not JWT_PUBLIC_KEY_PATH:
-    raise RuntimeError("JWT_PUBLIC_KEY_PATH must be set in production")
 
-try:
-    with open(JWT_PUBLIC_KEY_PATH, 'rb') as f:
-        JWT_PUBLIC_KEY = f.read()
-except FileNotFoundError:
-    raise RuntimeError(f"JWT public key file not found at {JWT_PUBLIC_KEY_PATH}")
+REDIS_URL = os.getenv("REDIS_URL", REDIS_URL)
+CACHES["default"]["LOCATION"] = REDIS_URL
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=int(os.environ.get('JWT_ACCESS_HOURS', '1'))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get('JWT_REFRESH_DAYS', '5'))),
-    'ROTATE_REFRESH_TOKENS': os.environ.get('JWT_ROTATE_REFRESH_TOKENS', 'False') == 'True',
-    'BLACKLIST_AFTER_ROTATION': os.environ.get('JWT_BLACKLIST_AFTER_ROTATION', 'True') == 'True',
-    'ALGORITHM': os.environ.get('JWT_ALGORITHM', 'RS256'),
-    'VERIFYING_KEY': JWT_PUBLIC_KEY,
-}
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", CELERY_BROKER_URL)
+CELERY_TASK_SERIALIZER = os.getenv("CELERY_TASK_SERIALIZER", CELERY_TASK_SERIALIZER)
+CELERY_ACCEPT_CONTENT = ["json"]
 
-# MongoDB settings
-MONGODB_SETTINGS = {
-    "db": os.environ.get('MONGO_DB'),
-    "host": os.environ.get('MONGO_HOST'),
-}
+LOG_SERVER_ENDPOINT = os.getenv("LOG_SERVER_ENDPOINT", LOG_SERVER.get("endpoint_url"))
+if LOG_SERVER_ENDPOINT:
+    LOG_SERVER = {"endpoint_url": LOG_SERVER_ENDPOINT}
+STORE_LOGS = env_bool("STORE_LOGS", STORE_LOGS)
 
-# Microservices URLs
-MICROSERVICE_URL = {
-    'test_token': os.environ.get('MICRO_TEST_TOKEN'),
-    'login': os.environ.get('MICRO_LOGIN'),
-    'product': os.environ.get('MICRO_PRODUCT'),
-    'product_owner': os.environ.get('MICRO_PRODUCT_OWNER'),
-    'car': os.environ.get('MICRO_CAR'),
-    'driver': os.environ.get('MICRO_DRIVER'),
-    'agriculture': os.environ.get('MICRO_AGR'),
-    'city': os.environ.get('MICRO_CITY'),
-}
+HEALTHCHECK_URL = os.getenv("HEALTHCHECK_URL", "/health/")
 
-MICROSERVICE_CONFIGS = {
-    'SlaughterERP': {
-        'username': os.environ.get('MICRO_USERNAME'),
-        'password': os.environ.get('MICRO_PASSWORD'),
-    }
-}
-
-# Redis cache config
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get('REDIS_LOCATION'),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
-}
-
-# Celery config
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_USE = os.environ.get('CELERY_USE', 'False') == 'True'
-
-# Log service
-LOG_SERVER = {
-    'endpoint_url': os.environ.get('LOG_ENDPOINT_URL')
-}
-STORE_LOGS = os.environ.get('STORE_LOGS', 'False') == 'True'
-
-# Elasticsearch config
-warnings.filterwarnings("ignore", category=InsecureRequestWarning)
-ELASTICSEARCH_CONNECTION = Elasticsearch(
-    [os.environ.get('ELASTICSEARCH_HOST')],
-    basic_auth=(
-        os.environ.get('ELASTIC_USERNAME'),
-        os.environ.get('ELASTIC_PASSWORD')
-    ),
-    verify_certs=False
-)
-ELASTICSEARCH_STATUS = os.environ.get('ELASTICSEARCH_STATUS', 'False') == 'True'
-
-# GraphQL schema
-GRAPHENE = {
-    'SCHEMA': os.environ.get('GRAPHENE_SCHEMA')
-}
+USE_S3 = env_bool("USE_S3", False)
+if USE_S3:
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
