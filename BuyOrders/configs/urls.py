@@ -39,8 +39,11 @@ schema_view = get_schema_view(
 
 )
 
+from apps.core import views as core_views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('healthz/', core_views.healthz, name='healthz'),
     path('', include('django_prometheus.urls')),
 
     # documentation

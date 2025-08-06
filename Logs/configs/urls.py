@@ -41,8 +41,11 @@ schema_view = get_schema_view(
 router = CustomRouter()
 router.register('api/v1/logs', LogsAPIView)
 
+from apps.core import views as core_views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('healthz/', core_views.healthz, name='healthz'),
 
     # documentation
     path('api-docs/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
