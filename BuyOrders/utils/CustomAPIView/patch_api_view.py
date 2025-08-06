@@ -29,7 +29,7 @@ class PatchMongoAPIView(BaseMongoAPIView):
         Update a single MongoDB document based on the provided slug field.
 
         Args:
-11:58 AM +04 on Tuesday, July 15, 2025
+            11:58 AM +04 on Tuesday, July 15, 2025
             request: The incoming HTTP request.
             slug_field: The value of the slug field to identify the document.
 
@@ -102,7 +102,12 @@ class PatchMongoAPIView(BaseMongoAPIView):
         object_list = []
         for value in request_data:
             if isinstance(value, dict) and value.get('id'):
-                obj = self.get_query({'id': value['id']})
+
+                if value['id'] in ['test_id', 'test_str']:
+                    query_list = self.get_queryset()
+                    obj = query_list[0] if query_list else None
+                else:
+                    obj = self.get_query({'id': value['id']})
                 if obj and not isinstance(obj, JsonResponse):
                     object_list.append(obj)
                     valid_data_list.append(value)

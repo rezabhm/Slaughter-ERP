@@ -4,7 +4,7 @@ token = {
         "access_token": access_token,
         "cookies_token_keyname": "access_token"
 }
-ip_server = 'http://127.0.0.1:8001/api/v1/buy'
+ip_server = 'http://127.0.0.1:8001/api/v1'
 
 
 crud_test_configs = {
@@ -13,7 +13,11 @@ crud_test_configs = {
     "token": token,
     "ip_server": ip_server,
     "endpoints": [
-        "/production-product/"
+        "/buy-product/",
+        "/order-bank-account/",
+        "/order-invoice/",
+        "/order-payment/",
+        "/order-purchase-order/",
     ]
 
 }

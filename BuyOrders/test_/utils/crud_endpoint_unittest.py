@@ -27,32 +27,32 @@ def get_crud_urls(endpoint: str) -> list[dict]:
 
         # single operation
         {
-            'url': f'{endpoint}c/',
+            'url': f'{endpoint}create/',
             'method': 'POST',
             'title': 'single post request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'GET',
             'title': 'single get request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'PATCH',
             'title': 'single patch request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'GET',
             'title': 'single get request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'DELETE',
             'title': 'single delete request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'GET',
             'title': 'single get request'
         },
@@ -153,9 +153,7 @@ class EndpointCRUDUnitTesting(ExtractDRFSwaggerAPISchema, CustomRequest):
         """
 
         apis_schema = self.extract_api_schema()
-
         for endpoint in self.endpoints:
-
             get_cruds_urls = get_crud_urls(f'{self.ip_server}{endpoint}')
             pre_response = requests.Response
 
@@ -200,7 +198,6 @@ class EndpointCRUDUnitTesting(ExtractDRFSwaggerAPISchema, CustomRequest):
             test_obj = EndpointUnitTest(**schema)
             test_result = test_obj.run_test()
 
-            # print('\n\n\n')
             if test_result['is_success']:
                 return test_result, test_result['response'].json()
 

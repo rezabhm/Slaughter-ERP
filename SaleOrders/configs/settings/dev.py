@@ -1,31 +1,37 @@
+import os
+import warnings
 from datetime import timedelta
-
+from urllib3.exceptions import InsecureRequestWarning
 from elasticsearch import Elasticsearch
 
 from configs.settings.base import *
-import warnings
-from urllib3.exceptions import InsecureRequestWarning
 
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+# Debug mode enabled for development
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
+# Database configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'SlaughterERP_SaleOrders',
-        'USER': 'postgres',
-        'PASSWORD': 'rezabhm:1290',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.environ.get('DB_NAME', 'SlaughterERP_SaleOrders'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
+# CORS configuration
+CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'True') == 'True'
 
-# Cors headers Config
-CORS_ALLOW_ALL_ORIGINS = True
+def _split_env_list(key, default=''):
+    val = os.environ.get(key, default)
+    if not val:
+        return []
+    return [item.strip() for item in val.split(',') if item.strip()]
+
+CORS_ALLOWED_ORIGINS = _split_env_list('CORS_ALLOWED_ORIGINS', 'http://localhost:3000')
 
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -37,98 +43,89 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CORS_ALLOW_METHODS = [
-    "GET",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
+    "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Example: React frontend
-    # "https://your-production-domain.com",
-]
-
-# Load public key from PEM file
-with open('configs/settings/jwt/public_key.pem', 'rb') as public_key_file:
-    JWT_PUBLIC_KEY = public_key_file.read()
+# Load JWT public key from file
+JWT_PUBLIC_KEY_PATH = os.environ.get('JWT_PUBLIC_KEY_PATH', 'configs/settings/jwt/public_key.pem')
+try:
+    with open(JWT_PUBLIC_KEY_PATH, 'rb') as f:
+        JWT_PUBLIC_KEY = f.read()
+except FileNotFoundError:
+    JWT_PUBLIC_KEY = None
+    print(f"Warning: JWT public key not found at {JWT_PUBLIC_KEY_PATH}")
 
 # JWT settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=5),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': 'RS256',
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=int(os.environ.get('JWT_ACCESS_HOURS', '1'))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get('JWT_REFRESH_DAYS', '5'))),
+    'ROTATE_REFRESH_TOKENS': os.environ.get('JWT_ROTATE_REFRESH_TOKENS', 'False') == 'True',
+    'BLACKLIST_AFTER_ROTATION': os.environ.get('JWT_BLACKLIST_AFTER_ROTATION', 'True') == 'True',
+    'ALGORITHM': os.environ.get('JWT_ALGORITHM', 'RS256'),
     'VERIFYING_KEY': JWT_PUBLIC_KEY,
 }
 
-
-# mongoDB settings
+# MongoDB settings
 MONGODB_SETTINGS = {
-    "db": "SlaughterERP_SaleOrders",
-    "host": "mongodb://localhost:27017/SlaughterERP_SaleOrders",
+    "db": os.environ.get('MONGO_DB', 'SlaughterERP_SaleOrders'),
+    "host": os.environ.get('MONGO_HOST', 'mongodb://localhost:27017/SlaughterERP_SaleOrders'),
 }
 
-# microservice data
+# Microservice URLs
 MICROSERVICE_URL = {
-
-    'test_token': 'http://127.0.0.1:8000/api/v1/admin/accounts/role/',
-    'login': 'http://127.0.0.1:8000/api/v1/auth/login',
-
-    'product': 'http://127.0.0.1:8000/api/v1/admin/product/product/',
-    'product_owner': 'http://127.0.0.1:8000/api/v1/admin/ownership/product-owner/',
-    'car': 'http://127.0.0.1:8000/api/v1/admin/transportation/car/',
-    'driver': 'http://127.0.0.1:8000/api/v1/admin/transportation/driver/',
-    'agriculture': 'http://127.0.0.1:8000/api/v1/admin/ownership/agriculture/',
-    'city': 'http://127.0.0.1:8000/api/v1/admin/ownership/city/',
-
+    'test_token': os.environ.get('MICRO_TEST_TOKEN', 'http://127.0.0.1:8000/api/v1/admin/accounts/role/'),
+    'login': os.environ.get('MICRO_LOGIN', 'http://127.0.0.1:8000/api/v1/auth/login'),
+    'product': os.environ.get('MICRO_PRODUCT', 'http://127.0.0.1:8000/api/v1/admin/product/product/'),
+    'product_owner': os.environ.get('MICRO_PRODUCT_OWNER', 'http://127.0.0.1:8000/api/v1/admin/ownership/product-owner/'),
+    'car': os.environ.get('MICRO_CAR', 'http://127.0.0.1:8000/api/v1/admin/transportation/car/'),
+    'driver': os.environ.get('MICRO_DRIVER', 'http://127.0.0.1:8000/api/v1/admin/transportation/driver/'),
+    'agriculture': os.environ.get('MICRO_AGR', 'http://127.0.0.1:8000/api/v1/admin/ownership/agriculture/'),
+    'city': os.environ.get('MICRO_CITY', 'http://127.0.0.1:8000/api/v1/admin/ownership/city/'),
 }
 
 MICROSERVICE_CONFIGS = {
-
     'SlaughterERP': {
-        'username': 'service_sale_orders',
-        'password': '12345'
+        'username': os.environ.get('MICRO_USERNAME', 'service_sale_orders'),
+        'password': os.environ.get('MICRO_PASSWORD', '12345'),
     }
 }
 
-# Redis Configs
+# Redis configuration
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": os.environ.get('REDIS_LOCATION', "redis://127.0.0.1:6379/1"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
 }
 
-# celery Settings
-CELERY_BROKER_URL = 'amqp://localhost'
+# Celery settings
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://localhost')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_USE = False
+CELERY_USE = os.environ.get('CELERY_USE', 'False') == 'True'
 
-# Log Service
+# Log service
 LOG_SERVER = {
-
-    'endpoint_url': "http://127.0.0.1:8010/api/v1/logs/c/"
-
+    'endpoint_url': os.environ.get('LOG_ENDPOINT_URL', "http://127.0.0.1:8010/api/v1/logs/c/")
 }
-STORE_LOGS = False
+STORE_LOGS = os.environ.get('STORE_LOGS', 'False') == 'True'
 
-# ElasticSearch
+# Elasticsearch configuration
 warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 ELASTICSEARCH_CONNECTION = Elasticsearch(
-    ['https://localhost:9200'],
-    basic_auth=('elastic', 'PaJ*8-X9YaOD+YyGcBRk'),
+    [os.environ.get('ELASTICSEARCH_HOST', 'https://localhost:9200')],
+    basic_auth=(
+        os.environ.get('ELASTIC_USERNAME', 'elastic'),
+        os.environ.get('ELASTIC_PASSWORD', 'PaJ*8-X9YaOD+YyGcBRk')
+    ),
     verify_certs=False
 )
-ELASTICSEARCH_STATUS = False
+ELASTICSEARCH_STATUS = os.environ.get('ELASTICSEARCH_STATUS', 'False') == 'True'
 
 # GraphQL schema
 GRAPHENE = {
-    'SCHEMA': 'GraphQL.schema.schema'
+    'SCHEMA': os.environ.get('GRAPHENE_SCHEMA', 'GraphQL.schema.schema')
 }

@@ -9,6 +9,8 @@ from apps.sale.elasticsearch.utils import (
     create_index_loaded_product,
     create_index_loaded_product_item,
 )
+# Register document signals for Elasticsearch
+from apps.sale.elasticsearch.signals import *
 
 
 class SaleConfig(AppConfig):
@@ -28,10 +30,3 @@ class SaleConfig(AppConfig):
             create_index_truck_loading()
             create_index_loaded_product()
             create_index_loaded_product_item()
-
-            # Register document signals for Elasticsearch
-            from apps.sale.elasticsearch.signals import *
-
-    def ready(self):
-        mongo_settings = settings.MONGODB_SETTINGS
-        connect(**mongo_settings)

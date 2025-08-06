@@ -27,13 +27,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'roles': [
                 {
                     'role_name': role.role_name,
-                    'role': role.role,
+                    'role': role.role_slug,
                     'units': [
                         {'name': unit.name, 'slug': unit.slug}
-                        for unit in role.unit.all().only('name', 'slug')
+                        for unit in role.units.all().only('name', 'slug')
                     ]
                 }
-                for role in user.role.all().only('role_name', 'role')
+                for role in user.roles.all()
             ]
         })
         return data
@@ -54,13 +54,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['roles'] = [
             {
                 'role_name': role.role_name,
-                'role': role.role,
+                'role': role.role_slug,
                 'units': [
                     {'name': unit.name, 'slug': unit.slug}
-                    for unit in role.unit.all().only('name', 'slug')
+                    for unit in role.units.all().only('name', 'slug')
                 ]
             }
-            for role in user.role.all().only('role_name', 'role')
+            for role in user.roles.all()
         ]
         return token
 

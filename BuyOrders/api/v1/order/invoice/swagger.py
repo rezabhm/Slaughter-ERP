@@ -6,4 +6,4 @@ class AddPurchaseOrdersSwaggerSerializer(CustomSerializer):
 
     class Meta:
         model = Invoice
-        fields = ['purchase_order']
+        fields = ['product_list']

@@ -21,8 +21,8 @@ def set_status_400_status(slug_id):
 def handle_status(user, slug_id, lookup_field, action_type, validated_data, model=ProductionOrder):
     obj = get_model_object(model, {lookup_field: slug_id})
     if obj:
-        action_status = validated_data['status']
-        action_description = validated_data['description']
+        action_status = validated_data.get('status', '')
+        action_description = validated_data.get('description', '')
 
         # Set CheckStatus for the given action
         setattr(

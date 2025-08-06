@@ -70,6 +70,7 @@ class ProductCategory(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        blank=True,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the product category.")
     )
@@ -141,6 +142,7 @@ class Product(models.Model):
     )
     slug = models.SlugField(
         max_length=100,
+        blank=True,
         unique=True,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the product.")

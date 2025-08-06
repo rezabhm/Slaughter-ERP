@@ -73,6 +73,7 @@ class CustomUser(AbstractUser):
     roles = models.ManyToManyField(
         Role,
         blank=True,
+        null=True,
         related_name="users",
         verbose_name=_("Roles"),
         help_text=_("Roles assigned to this user.")
