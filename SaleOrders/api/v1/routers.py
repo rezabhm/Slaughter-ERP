@@ -1,3 +1,4 @@
+from api.v1.core.views_roles.view import ViewsRolesAPIView
 from api.v1.order.order.view import OrderAPIView
 from api.v1.order.order_item.view import OrderItemAPIView
 from api.v1.sale.loaded_product.view import LoadedProductAPIView
@@ -7,6 +8,7 @@ from utils.CustomRouter.CustomRouter import CustomRouter
 
 router = CustomRouter()
 
+router.register('core-views-roles', ViewsRolesAPIView)
 router.register('sale/truck-loading', TruckLoadingAPIView)
 router.register('sale/loaded-product', LoadedProductAPIView)
 router.register('sale/loaded-product-items', LoadedProductItemAPIView)

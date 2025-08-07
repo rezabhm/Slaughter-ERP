@@ -1,3 +1,4 @@
+from api.v1.core.views_roles.view import ViewsRolesAPIView
 from api.v1.planning.planning_series.view import PlanningSeriesAPIView
 from api.v1.planning.planning_series_cell.view import PlanningSeriesCellAPIView
 from api.v1.poultry_cutting_production.export_product.view import PoultryCuttingExportProductAPIView
@@ -12,6 +13,7 @@ from utils.CustomRouter.CustomRouter import CustomRouter
 
 default_router = CustomRouter()
 
+default_router.register('core-views-roles', ViewsRolesAPIView)
 default_router.register('production/series', ProductionSeriesAPIView)
 default_router.register('production/import-product-by-car', ImportProductByCarAPIView)
 default_router.register('production/import-product-from-warehouse', ImportProductFromWareHouseAPIView)
