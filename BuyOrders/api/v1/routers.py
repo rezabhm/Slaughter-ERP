@@ -1,4 +1,5 @@
 from api.v1.buy.production_order.view import ProductionOrderAPIView
+from api.v1.core.views_roles.view import ViewsRolesAPIView
 from api.v1.order.bank_account.view import BankAccountAPIView
 from api.v1.order.invoice.view import InvoiceAPIView
 from api.v1.order.payment.view import PaymentAPIView
@@ -7,6 +8,7 @@ from utils.CustomRouter.CustomRouter import CustomRouter
 
 router = CustomRouter()
 
+router.register('core-views-roles', ViewsRolesAPIView)
 router.register('buy-product', ProductionOrderAPIView)
 router.register('order-bank-account', BankAccountAPIView)
 router.register('order-invoice', InvoiceAPIView)
