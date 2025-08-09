@@ -40,7 +40,7 @@ for i in $(seq 0 $(($SERVICES_COUNT - 1))); do
 
     # Generate .env file
     echo "Generating .env file..."
-    python init_env.py
+    python auto_init_env.py
 
     # Run makemigrations
     echo "Running makemigrations for apps: $APPS..."

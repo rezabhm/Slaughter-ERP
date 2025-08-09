@@ -17,4 +17,4 @@ COPY docker/launcher.sh /app/launcher.sh
 RUN chmod +x /app/launcher.sh
 
 # Set the entrypoint
-CMD ["/app/launcher.sh"]
+CMD ["/docker/launcher.sh"]

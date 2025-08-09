@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "🔧 Running init_env.py ..."
-python init_env.py
+python auto_init_env.py
 
 echo "🧹 Collecting static files ..."
 python manage.py collectstatic --noinput
