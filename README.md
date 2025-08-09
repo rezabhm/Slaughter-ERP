@@ -37,6 +37,20 @@ This ERP system is designed to help slaughterhouses manage daily operations — 
 
 ---
 
+## 🏛️ Microservices Architecture
+
+The ERP system is built on a microservices architecture, with each service responsible for a specific business domain. This design improves scalability, maintainability, and flexibility.
+
+| Service | Description | README |
+|---|---|---|
+| **slaughterERP** | Manages core data, including user accounts, product information, and ownership. | [slaughterERP/README.md](./slaughterERP/README.md) |
+| **BuyOrders** | Handles all procurement-related activities, including purchase orders. | [BuyOrders/README.md](./BuyOrders/README.md) |
+| **SaleOrders** | Manages all sales-related operations, from truck loading to final sale. | [SaleOrders/README.md](./SaleOrders/README.md) |
+| **WarehouseManagement** | Manages inventory and warehouse operations, including tracking product movements. | [WarehouseManagement/README.md](./WarehouseManagement/README.md) |
+| **Production** | Orchestrates the entire production workflow, from raw material intake to finished goods. | [Production/README.md](./Production/README.md) |
+
+---
+
 ## 🚧 Challenges & Solutions
 
 | Challenge | Solution |
@@ -78,26 +92,6 @@ cd slaughter-erp/
 
 ### 6. Access the app
 *This step is not yet implemented.*
-
----
-
-## 📂 Project Structure
-
-```
-/slaughter-erp
-│
-├── BuyOrders/              # Microservice: Purchase Management
-├── SaleOrders/             # Microservice: Sales Management
-├── WarehouseManagement/    # Microservice: Inventory Management
-├── Production/             # Microservice: Production Tracking
-│
-├── configs/                # Project settings, URL configs, etc.
-├── shared/                 # Shared utilities, base classes, etc.
-├── docker/                 # Docker-related files
-├── k8s/                    # Kubernetes manifests (if available)
-│
-└── README.md               # You are here
-```
 
 ---
 
