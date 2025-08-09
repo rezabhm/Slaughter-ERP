@@ -138,7 +138,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django Rest Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'utils.jwt_validator.CustomJWTAuthentication',  # Use JWT
+        'utils.CustomJWTAuthentication.jwt_validator.CustomJWTAuthentication',  # Use JWT
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',  # Optional: restrict access to authenticated users

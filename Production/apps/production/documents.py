@@ -27,7 +27,8 @@ class ProductionSeries(mongo.Document):
 
     product_owner = mongo.IntField(null=True)
 
-    status = mongo.StringField(default='pending', choices=production_series_status)
+    # status = mongo.StringField(default='pending', choices=production_series_status)
+    status = mongo.StringField(default='pending')
 
 
 class FirstStepImportCar(mongo.EmbeddedDocument):
@@ -87,15 +88,17 @@ class ImportProduct(mongo.Document):
     car = mongo.ReferenceField(Car, null=True)
     product = mongo.ReferenceField(Product, null=True)
 
-    slaughter_type = mongo.StringField(default='Slaughterhouse delivery', choices=(
-        ('Slaughterhouse delivery', 'Slaughterhouse delivery'),
-        ('Poultry farm door', 'Poultry farm door')
-    ))
-    order_type = mongo.StringField(default='company', choices=(
-        ('company', 'company'),
-        ('Purchase commission by the company', 'Purchase commission by the company'),
-        ('Purchase commission by the product owner', 'Purchase commission by the product owner'),
-    ))
+    slaughter_type = mongo.StringField(default='Slaughterhouse delivery')
+    order_type = mongo.StringField(default='company')
+    # slaughter_type = mongo.StringField(default='Slaughterhouse delivery', choices=(
+    #     ('Slaughterhouse delivery', 'Slaughterhouse delivery'),
+    #     ('Poultry farm door', 'Poultry farm door')
+    # ))
+    # order_type = mongo.StringField(default='company', choices=(
+    #     ('company', 'company'),
+    #     ('Purchase commission by the company', 'Purchase commission by the company'),
+    #     ('Purchase commission by the product owner', 'Purchase commission by the product owner'),
+    # ))
 
     first_step = mongo.EmbeddedDocumentField(FirstStepImportCar, )
     second_step = mongo.EmbeddedDocumentField(SecondStepImportCar, )
@@ -172,7 +175,8 @@ class ReturnProduct(mongo.Document):
     receiver_delivery_unit = mongo.StringField(default='')
     product = mongo.ReferenceField(Product)
     product_information = mongo.EmbeddedDocumentField(ProductInformation)
-    return_type = mongo.StringField(choices=return_type_dict, default='return from production')
+    # return_type = mongo.StringField(choices=return_type_dict, default='return from production')
+    return_type = mongo.StringField(default='return from production')
 
     create = mongo.EmbeddedDocumentField(DateUser, default=lambda req: DateUser(
         user=req.user_payload['username']))

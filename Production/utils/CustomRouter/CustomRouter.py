@@ -46,7 +46,7 @@ class CustomRouter:
 
         # Register URL patterns for single operations
         self.urls.append(
-            path(f'{url}<str:slug_field>/', view.as_view({
+            path(f'{url}c/<str:slug_field>/', view.as_view({
                 'get': 'single_get',
                 'patch': 'single_patch_request',
                 'delete': 'single_delete_request',
@@ -63,7 +63,7 @@ class CustomRouter:
         # Register URL patterns for custom actions
         for action_name in action_list:
             self.urls.append(
-                path(f'{url}<str:slug>/{action_name}/', view.as_view({
+                path(f'{url}a/<str:slug>/{action_name}/', view.as_view({
                     'post': f'action_{action_name}',
                 }))
             )

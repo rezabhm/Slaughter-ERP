@@ -186,7 +186,7 @@ def custom_swagger_generator(serializer_class: Type, method: str, many: bool = T
     response_example = {'data': [example_object] * 3} if many else example_object
 
     if method == 'single_delete':
-        response_example = {'data': 'Object deleted successfully'}
+        response_example = {'message': 'Object deleted successfully'}
     elif method == 'bulk_delete':
         response_example = {'data': {
             'test_str': {'message': 'Object deleted successfully', 'status': 200},

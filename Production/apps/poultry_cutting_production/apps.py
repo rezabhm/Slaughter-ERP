@@ -9,6 +9,12 @@ from apps.poultry_cutting_production.elasticsearch.utils import (
     create_index_poultry_cutting_return_product,
 )
 
+# If Elasticsearch indexing is enabled, create indices and register signals
+if getattr(settings, 'ELASTICSEARCH_STATUS', False):
+
+    # Register document signals for Elasticsearch
+    from apps.poultry_cutting_production.elasticsearch.signals import *
+
 
 class PoultryCuttingProductionConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -29,5 +35,3 @@ class PoultryCuttingProductionConfig(AppConfig):
             create_index_poultry_cutting_export_product()
             create_index_poultry_cutting_return_product()
 
-            # Register document signals for Elasticsearch
-            from apps.poultry_cutting_production.elasticsearch.signals import *

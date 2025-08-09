@@ -42,7 +42,7 @@ class PlanningSeriesCellAPIView(CustomAPIView):
         self.lookup_field = 'id'
 
         # Default ordering applied to queryset
-        self.ordering_fields = ['priority']
+        self.ordering_fields = 'priority'
 
         # Serializers per HTTP method
         self.serializer_class = {

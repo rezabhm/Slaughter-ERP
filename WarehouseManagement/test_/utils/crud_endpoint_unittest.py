@@ -27,32 +27,32 @@ def get_crud_urls(endpoint: str) -> list[dict]:
 
         # single operation
         {
-            'url': f'{endpoint}c/',
+            'url': f'{endpoint}create/',
             'method': 'POST',
             'title': 'single post request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'GET',
             'title': 'single get request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'PATCH',
             'title': 'single patch request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'GET',
             'title': 'single get request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'DELETE',
             'title': 'single delete request'
         },
         {
-            'url': f'{endpoint}s/<id>/',
+            'url': f'{endpoint}c/<id>/',
             'method': 'GET',
             'title': 'single get request'
         },
@@ -123,39 +123,37 @@ class EndpointCRUDUnitTesting(ExtractDRFSwaggerAPISchema, CustomRequest):
         """
 
         """
-        example schema
+        example schema 
         apis_schema = [
 
              'http://127.0.0.1:8001/api/v1/order/purchase-order/test_id/verified_finance/@post': {
-
+             
                     'data': {'status': 'pending '
                                          'for '
                                          'approved '
                                          'by '
                                          'financial '
                                          'department'},
-
+                    
                     'endpoint': 'http://127.0.0.1:8001/api/v1/order/purchase-order/test_id/verified_finance/',
-
+                    
                     'expected_response': {
-
+                    
                             'body': {
                                         'message': 'Purchase order successfully verified by finance'
                                     },
                             'status_code': 200
                                     },
-
+                                    
                     'method': 'POST'
-
+                    
                     }
-
+        
         ]
         """
 
         apis_schema = self.extract_api_schema()
-
         for endpoint in self.endpoints:
-
             get_cruds_urls = get_crud_urls(f'{self.ip_server}{endpoint}')
             pre_response = requests.Response
 
@@ -200,7 +198,6 @@ class EndpointCRUDUnitTesting(ExtractDRFSwaggerAPISchema, CustomRequest):
             test_obj = EndpointUnitTest(**schema)
             test_result = test_obj.run_test()
 
-            # print('\n\n\n')
             if test_result['is_success']:
                 return test_result, test_result['response'].json()
 

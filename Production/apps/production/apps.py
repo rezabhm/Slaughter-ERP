@@ -12,6 +12,12 @@ from apps.production.elasticsearch.utils import (
     create_index_return_product,
 )
 
+# If Elasticsearch indexing is enabled, create indices and register signals
+if getattr(settings, 'ELASTICSEARCH_STATUS', False):
+
+    # Register document signals for Elasticsearch
+    from apps.production.elasticsearch.signals import *
+
 
 class ProductionConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -32,10 +38,3 @@ class ProductionConfig(AppConfig):
             create_index_import_product_from_warehouse()
             create_index_export_product()
             create_index_return_product()
-
-            # Register document signals for Elasticsearch
-            from apps.production.elasticsearch.signals import *
-
-    def ready(self):
-        mongo_settings = settings.MONGODB_SETTINGS
-        connect(**mongo_settings)

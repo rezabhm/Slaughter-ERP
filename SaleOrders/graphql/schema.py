@@ -1,13 +1,13 @@
 import graphene
 
-from SaleOrders.graphql.loaded_product_item_schema import LoadedProductItemQuery
-from SaleOrders.graphql.loaded_product_schema import LoadedProductQuery
-from SaleOrders.graphql.order_item_schema import OrderItemQuery
-from SaleOrders.graphql.order_schema import OrderQuery
-from SaleOrders.graphql.truck_loading_schema import TruckLoadingQuery
-
+from GraphQL.loaded_product_item_schema import LoadedProductItemQuery
+from GraphQL.loaded_product_schema import LoadedProductQuery
+from GraphQL.order_item_schema import OrderItemQuery
+from GraphQL.order_schema import OrderQuery
+from GraphQL.truck_loading_schema import TruckLoadingQuery
 
 class Query(
+
     OrderQuery,
     OrderItemQuery,
     TruckLoadingQuery,
@@ -15,7 +15,8 @@ class Query(
     LoadedProductItemQuery,
     graphene.ObjectType
 ):
-    pass
 
+
+    pass
 
 schema = graphene.Schema(query=Query)

@@ -29,7 +29,8 @@ class PoultryCuttingProductionSeries(mongo.Document):
     start = mongo.EmbeddedDocumentField(DateUser)
     finished = mongo.EmbeddedDocumentField(DateUser)
 
-    status = mongo.StringField(default='pending', choices=production_series_status)
+    # status = mongo.StringField(default='pending', choices=production_series_status)
+    status = mongo.StringField(default='pending')
 
 
 class PoultryCuttingImportProduct(mongo.Document):
@@ -38,7 +39,8 @@ class PoultryCuttingImportProduct(mongo.Document):
 
     product = mongo.ReferenceField(Product)
     product_information = mongo.EmbeddedDocumentField(ProductInformation)
-    production_status = mongo.StringField(choices=production_series_status, default='pending')
+    # production_status = mongo.StringField(choices=production_series_status, default='pending')
+    production_status = mongo.StringField(default='pending')
 
     dispatch_unit = mongo.StringField(default='')
     dispatch = mongo.EmbeddedDocumentField(CheckStatus)
@@ -71,7 +73,8 @@ class PoultryCuttingReturnProduct(mongo.Document):
     product = mongo.ReferenceField(Product)
     product_information = mongo.EmbeddedDocumentField(ProductInformation)
 
-    return_type = mongo.StringField(choices=return_type_dict, default='return from production')
+    # return_type = mongo.StringField(choices=return_type_dict, default='return from production')
+    return_type = mongo.StringField(default='return from production')
     create = mongo.EmbeddedDocumentField(DateUser)
     verified = mongo.EmbeddedDocumentField(CheckStatus)
 

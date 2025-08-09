@@ -9,8 +9,11 @@ from apps.sale.elasticsearch.utils import (
     create_index_loaded_product,
     create_index_loaded_product_item,
 )
-# Register document signals for Elasticsearch
-from apps.sale.elasticsearch.signals import *
+
+# If Elasticsearch indexing is enabled, create indices and register signals
+if getattr(settings, 'ELASTICSEARCH_STATUS', False):
+    # Register document signals for Elasticsearch
+    from apps.sale.elasticsearch.signals import *
 
 
 class SaleConfig(AppConfig):

@@ -24,6 +24,8 @@ class City(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        blank=True,
+        null=True,
         editable=False,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the city.")
@@ -87,6 +89,8 @@ class Agriculture(models.Model):
         max_length=50,
         unique=True,
         editable=False,
+        blank=True,
+        null=True,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the agriculture entity.")
     )
@@ -132,6 +136,8 @@ class ProductOwner(models.Model):
     """
     contact = models.ForeignKey(
         Contact,
+        blank=True,
+        null=True,
         on_delete=models.PROTECT,
         related_name="product_owners",
         verbose_name=_("Contact"),
@@ -141,6 +147,8 @@ class ProductOwner(models.Model):
         max_length=50,
         unique=True,
         editable=False,
+        blank=True,
+        null=True,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the product owner.")
     )

@@ -5,9 +5,9 @@ from typing import List, Optional, Callable, Dict
 from dataclasses import dataclass
 
 from configs import crud_test_configs, drf_test_configs
-from _test.utils.crud_endpoint_unittest import EndpointCRUDUnitTesting
-from _test.utils.drf_api_unittesting import DRFAPIUnitTesting
-from _test.utils.manual_unittesting import ManualEndpointUnitTesting
+from utils.crud_endpoint_unittest import EndpointCRUDUnitTesting
+from utils.drf_api_unittesting import DRFAPIUnitTesting
+from utils.manual_unittesting import ManualEndpointUnitTesting
 
 
 def get_manual_test_json_list() -> List[str]:
@@ -17,7 +17,7 @@ def get_manual_test_json_list() -> List[str]:
     Returns:
         List[str]: List of file paths for JSON test files.
     """
-    return glob.glob('manual_test_json/*.json')
+    return glob.glob('manual_test_json\\*.json')
 
 
 @dataclass
@@ -95,7 +95,7 @@ class EndpointTester:
         ]
         # Add JSON files as manual test options dynamically
         manual_options += [
-            MenuOption(json_path.split('/')[-1], json_path, action=self.run_manual_test)
+            MenuOption(json_path.split('\\')[-1], json_path, action=self.run_manual_test)
             for json_path in get_manual_test_json_list()
         ]
         manual_options.append(MenuOption("Back", "back", next_menu=0))
@@ -297,7 +297,7 @@ if __name__ == "__main__":
 
             if selected == 'all':
                 for json_path in get_manual_test_json_list():
-                    print(f'\n\nRun Test [{json_path.split("/")[-1]}]:')
+                    print(f'\n\nRun Test [{json_path.split("\\")[-1]}]:')
                     manual_testing = ManualEndpointUnitTesting(endpoint_json_path=json_path)
                     manual_testing.run_test()
             else:

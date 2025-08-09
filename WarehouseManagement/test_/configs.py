@@ -1,10 +1,10 @@
-swagger_schema_url ="http://127.0.0.1:8004/api-docs/swagger.json"
+swagger_schema_url ="http://127.0.0.1:8003/api-docs/swagger.json"
 access_token = open('../configs/settings/jwt/token.txt', 'r').read()
 token = {
         "access_token": access_token,
         "cookies_token_keyname": "access_token"
 }
-ip_server = 'http://127.0.0.1:8004/api/v1'
+ip_server = 'http://127.0.0.1:8003/api/v1'
 
 
 crud_test_configs = {
@@ -13,11 +13,9 @@ crud_test_configs = {
     "token": token,
     "ip_server": ip_server,
     "endpoints": [
-        "/sale/truck-loading/",
-        "/sale/loaded-product/",
-        "/sale/loaded-product-items/",
-        "/order/order/",
-        "/order/order-item/"
+        "/warehouse/",
+        "/transaction/",
+        "/inventory/"
     ]
 
 }

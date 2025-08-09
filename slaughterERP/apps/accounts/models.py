@@ -22,6 +22,8 @@ class Role(models.Model):
         max_length=50,
         unique=True,
         editable=False,
+        blank=True,
+        null=True,
         verbose_name=_("Role Slug"),
         help_text=_("URL-friendly identifier for the role.")
     )
@@ -113,6 +115,8 @@ class Contact(models.Model):
         max_length=50,
         unique=True,
         editable=False,
+        blank=True,
+        null=True,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the contact.")
     )

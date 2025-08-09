@@ -94,12 +94,12 @@ if raw_micro:
 # fallback to individual vars or defaults
 MICROSERVICE_URL.setdefault("test_token", env("MICROSERVICE_TEST_TOKEN", "http://127.0.0.1:8000/api/v1/admin/accounts/role/"))
 MICROSERVICE_URL.setdefault("login", env("MICROSERVICE_LOGIN", "http://127.0.0.1:8000/api/v1/auth/login"))
-MICROSERVICE_URL.setdefault("product", env("MICROSERVICE_PRODUCT", "http://127.0.0.1:8000/api/v1/admin/product/product/"))
-MICROSERVICE_URL.setdefault("product_owner", env("MICROSERVICE_PRODUCT_OWNER", "http://127.0.0.1:8000/api/v1/admin/ownership/product-owner/"))
-MICROSERVICE_URL.setdefault("car", env("MICROSERVICE_CAR", "http://127.0.0.1:8000/api/v1/admin/transportation/car/"))
-MICROSERVICE_URL.setdefault("driver", env("MICROSERVICE_DRIVER", "http://127.0.0.1:8000/api/v1/admin/transportation/driver/"))
-MICROSERVICE_URL.setdefault("agriculture", env("MICROSERVICE_AGRICULTURE", "http://127.0.0.1:8000/api/v1/admin/ownership/agriculture/"))
-MICROSERVICE_URL.setdefault("city", env("MICROSERVICE_CITY", "http://127.0.0.1:8000/api/v1/admin/ownership/city/"))
+# MICROSERVICE_URL.setdefault("product", env("MICROSERVICE_PRODUCT", "http://127.0.0.1:8000/api/v1/admin/product/product/"))
+# MICROSERVICE_URL.setdefault("product_owner", env("MICROSERVICE_PRODUCT_OWNER", "http://127.0.0.1:8000/api/v1/admin/ownership/product-owner/"))
+# MICROSERVICE_URL.setdefault("car", env("MICROSERVICE_CAR", "http://127.0.0.1:8000/api/v1/admin/transportation/car/"))
+# MICROSERVICE_URL.setdefault("driver", env("MICROSERVICE_DRIVER", "http://127.0.0.1:8000/api/v1/admin/transportation/driver/"))
+# MICROSERVICE_URL.setdefault("agriculture", env("MICROSERVICE_AGRICULTURE", "http://127.0.0.1:8000/api/v1/admin/ownership/agriculture/"))
+# MICROSERVICE_URL.setdefault("city", env("MICROSERVICE_CITY", "http://127.0.0.1:8000/api/v1/admin/ownership/city/"))
 
 MICROSERVICE_CONFIGS = {}
 raw_microcfg = env("MICROSERVICE_CONFIGS", "")

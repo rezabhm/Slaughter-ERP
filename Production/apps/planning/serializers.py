@@ -11,7 +11,7 @@ class PlanningSeriesSerializer(CustomSerializer):
 class PlanningSeriesSerializerPOST(CustomSerializer):
     class Meta:
         model = PlanningSeries
-        fields = []
+        fields = ['is_finished']
 
 
 class PlanningSeriesCellSerializer(CustomSerializer):

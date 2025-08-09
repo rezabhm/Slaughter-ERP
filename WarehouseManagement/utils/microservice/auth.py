@@ -49,3 +49,7 @@ def load_slaughter_erp_token() -> Optional[str]:
         pass
 
     return None
+
+
+if __name__ == '__main__':
+    load_slaughter_erp_token()

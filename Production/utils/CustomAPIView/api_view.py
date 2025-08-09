@@ -26,3 +26,4 @@ class CustomAPIView(GetMongoAPIView, PostMongoAPIView, PatchMongoAPIView, Delete
             'single_delete': '',
             'bulk_delete': ''
         }
+

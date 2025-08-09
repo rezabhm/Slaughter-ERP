@@ -28,5 +28,6 @@ class PlanningSeriesCell(mongo.Document):
     id = mongo.StringField(primary_key=True, default=lambda: id_generator('PlanningSeriesCell'))
 
     priority = mongo.IntField(default=1)
-    import_type = mongo.StringField(choices=import_type_dict)
+    import_type = mongo.StringField()
+    # import_type = mongo.StringField(choices=import_type_dict)
     import_id = mongo.StringField(default='')

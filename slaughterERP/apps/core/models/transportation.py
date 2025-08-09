@@ -19,6 +19,8 @@ class Driver(models.Model):
     slug = models.SlugField(
         max_length=100,
         unique=True,
+        blank=True,
+        null=True,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the driver.")
     )
@@ -112,6 +114,8 @@ class Car(models.Model):
     )
     slug = models.SlugField(
         max_length=100,
+        blank=True,
+        null=True,
         unique=True,
         verbose_name=_("Slug"),
         help_text=_("URL-friendly identifier for the car.")

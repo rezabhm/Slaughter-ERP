@@ -1,4 +1,3 @@
-from apps.core.models import Core
 
 
 def id_generator(class_name: str) -> str:
@@ -11,6 +10,7 @@ def id_generator(class_name: str) -> str:
     Returns:
         str: The new incremented ID as a string.
     """
+    from apps.core.models import Core
     try:
         obj = Core.objects.get(name=class_name)
     except Core.DoesNotExist:

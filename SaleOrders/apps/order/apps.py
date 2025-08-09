@@ -9,6 +9,12 @@ from apps.order.elasticsearch.utils import (
     create_index_order_item,
 )
 
+# If Elasticsearch indexing is enabled, create indices and register signals
+if getattr(settings, 'ELASTICSEARCH_STATUS', False):
+
+    # Register document signals for Elasticsearch
+    from apps.order.elasticsearch.signals import *
+
 
 class OrderConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -27,9 +33,3 @@ class OrderConfig(AppConfig):
             create_index_order()
             create_index_order_item()
 
-            # Register document signals for Elasticsearch
-            from apps.order.elasticsearch.signals import *
-
-    def ready(self):
-        mongo_setting = settings.MONGODB_SETTINGS
-        connect(**mongo_setting)

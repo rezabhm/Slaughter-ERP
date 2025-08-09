@@ -10,6 +10,11 @@ from apps.warehouse.elasticsearch.utils import (
     create_index_transaction,
 )
 
+# If Elasticsearch indexing is enabled, create indices and register signals
+if getattr(settings, 'ELASTICSEARCH_STATUS', False):
+
+    # Register document signals for Elasticsearch
+    from apps.warehouse.elasticsearch.signals import *
 
 class WarehouseConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -29,9 +34,3 @@ class WarehouseConfig(AppConfig):
             create_index_inventory()
             create_index_transaction()
 
-            # Register document signals for Elasticsearch
-            from apps.warehouse.elasticsearch.signals import *
-
-    def ready(self):
-        mongo_setting = settings.MONGODB_SETTINGS
-        connect(**mongo_setting)

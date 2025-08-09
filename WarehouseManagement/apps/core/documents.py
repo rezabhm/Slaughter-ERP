@@ -5,7 +5,8 @@ from utils.id_generator import id_generator
 
 # Embedded document for DateUser
 class DateUser(mongo.EmbeddedDocument):
-    date = mongo.DateTimeField(default=timezone.now)
+    date = mongo.StringField(default=lambda:str(timezone.now))
+    # date = mongo.DateTimeField(default=timezone.now)
     user = mongo.StringField(null=True)
 
 

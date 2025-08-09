@@ -9,6 +9,12 @@ from apps.planning.elasticsearch.utils import (
     create_index_planning_series_cell,
 )
 
+# If Elasticsearch indexing is enabled, create indices and register signals
+if getattr(settings, 'ELASTICSEARCH_STATUS', False):
+
+    # Register document signals for Elasticsearch
+    from apps.planning.elasticsearch.signals import *
+
 
 class PlanningConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -27,9 +33,4 @@ class PlanningConfig(AppConfig):
             create_index_planning_series()
             create_index_planning_series_cell()
 
-            # Register document signals for Elasticsearch
-            from apps.planning.elasticsearch.signals import *
 
-    def ready(self):
-        mongo_settings = settings.MONGODB_SETTINGS
-        connect(**mongo_settings)
